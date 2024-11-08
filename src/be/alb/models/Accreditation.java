@@ -1,6 +1,6 @@
 package be.alb.models;
 
 public class Accreditation {
- // surcharger equals 
+ // override equals : to do 
  
 }
