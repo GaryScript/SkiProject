@@ -1,6 +1,6 @@
 package be.alb.models;
-
 import java.time.LocalDate;
+import be.alb.dao.InstructorDAO;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,5 +48,10 @@ public class Instructor extends Person {
 		// might need more verif
 		// might need a return ?
 	}
+	
+	public static List<Instructor> getAllInstructors() {
+        return InstructorDAO.getAllInstructors();
+    }
+	
 	
 }
