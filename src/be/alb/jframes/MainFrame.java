@@ -23,11 +23,6 @@ public class MainFrame extends JFrame {
 
         manageInstructorButton.addActionListener(e -> openManageInstructorPage());
 
-       
-        // manageSkierButton.addActionListener(e -> openManageSkierPage());
-        // createLessonButton.addActionListener(e -> openCreateLessonPage());
-        // createBookingButton.addActionListener(e -> openCreateBookingPage());
-
         panel.add(manageInstructorButton);
         panel.add(manageSkierButton);
         panel.add(createLessonButton);
@@ -39,28 +34,12 @@ public class MainFrame extends JFrame {
     }
 
     private void openManageInstructorPage() {
-        ManageInstructorsFrame manageInstructorsFrame = new ManageInstructorsFrame();
-        manageInstructorsFrame.setVisible(true); 
-        this.dispose(); 
+        ManageInstructorsPanel manageInstructorsPanel = new ManageInstructorsPanel();
+        setContentPane(manageInstructorsPanel);
+        revalidate();
     }
 
-
-    // 
-    // Méthodes pour les autres pages (en fonction de leur implémentation)
-    // private void openManageSkierPage() {
-    //     new SkierManagementFrame();
-    //     this.dispose();
-    // }
-    // private void openCreateLessonPage() {
-    //     new CreateLessonFrame();
-    //     this.dispose(); 
-    // }
-    // private void openCreateBookingPage() {
-    //     new CreateBookingFrame();
-    //     this.dispose();
-    // }
-
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new MainFrame()); 
+        SwingUtilities.invokeLater(() -> new MainFrame());
     }
 }
