@@ -1,43 +1,94 @@
 package be.alb.jframes;
 
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
-
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class MainFrame extends JFrame {
 
-	private static final long serialVersionUID = 1L;
-	private JPanel contentPane;
+    public MainFrame() {
+        // Configuration main frame
+        setTitle("Gestion de l'école de ski");
+        setSize(717, 563);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null); // centered window
 
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					MainFrame frame = new MainFrame();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
+        // Panel principal
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(4, 1)); 
 
-	/**
-	 * Create the frame.
-	 */
-	public MainFrame() {
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 450, 300);
-		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+        // buttons for redirection
+        JButton manageInstructorButton = new JButton("Manage Instructor");
+        JButton manageSkierButton = new JButton("Manage Skier");
+        JButton createLessonButton = new JButton("Create Lesson");
+        JButton createBookingButton = new JButton("Create Booking");
 
-		setContentPane(contentPane);
-	}
+        manageInstructorButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                openManageInstructorPage();
+            }
+        });
 
+        manageSkierButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                openManageSkierPage();
+            }
+        });
+
+        createLessonButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                openCreateLessonPage();
+            }
+        });
+
+        createBookingButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                openCreateBookingPage();
+            }
+        });
+
+        panel.add(manageInstructorButton);
+        panel.add(manageSkierButton);
+        panel.add(createLessonButton);
+        panel.add(createBookingButton);
+
+        getContentPane().add(panel);
+
+        setVisible(true);
+    }
+
+    // Methods open different pages
+    private void openManageInstructorPage() {
+        new InstructorManagementFrame();
+        this.dispose();
+    }
+
+    private void openManageSkierPage() {
+        new SkierManagementFrame();
+        this.dispose();
+    }
+
+    private void openCreateLessonPage() {
+        new CreateLessonFrame();
+        this.dispose(); 
+    }
+
+    private void openCreateBookingPage() {
+        new CreateBookingFrame();
+        this.dispose();
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new MainFrame();
+            }
+        });
+    }
 }
