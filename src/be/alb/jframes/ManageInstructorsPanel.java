@@ -7,31 +7,24 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
-public class ManageInstructorsFrame extends JFrame {
+public class ManageInstructorsPanel extends JPanel { // Change JFrame to JPanel
     private InstructorController instructorController;
 
-    public ManageInstructorsFrame() {
-    	InstructorController instructorController = new InstructorController();
-
-        setTitle("Manage Instructors");
-        setSize(600, 400);
+    public ManageInstructorsPanel() { // Correct constructor for ManageInstructorsPanel
+        instructorController = new InstructorController();
         setLayout(new BorderLayout());
 
-        // get all the instructors
+
         List<Instructor> instructors = instructorController.getAllInstructors();
 
         if (instructors == null || instructors.isEmpty()) {
             JOptionPane.showMessageDialog(this, "No instructors found.", "Info", JOptionPane.INFORMATION_MESSAGE);
-            return;  // If there are no instructors, exit the method
+            return;
         }
 
-        // Prepare the array to display all the instructors
         String[] columnNames = {"ID", "Nom", "Prénom", "Ville"};
-        
-        // Create an array to hold the data for the JTable
         Object[][] data = new Object[instructors.size()][columnNames.length];
 
-        // Fill the data array
         for (int i = 0; i < instructors.size(); i++) {
             Instructor instructor = instructors.get(i);
             data[i][0] = instructor.getId();
@@ -40,17 +33,14 @@ public class ManageInstructorsFrame extends JFrame {
             data[i][3] = instructor.getCity();
         }
 
-        // Create the table to display the instructors
+
         JTable table = new JTable(data, columnNames);
         add(new JScrollPane(table), BorderLayout.CENTER);
 
-        // Button for creating a new instructor
         JButton createButton = new JButton("Créer un nouvel instructeur");
         createButton.addActionListener(e -> {
-            // Logic to create a new instructor
+        		// todo
         });
         add(createButton, BorderLayout.NORTH);
-
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }
 }

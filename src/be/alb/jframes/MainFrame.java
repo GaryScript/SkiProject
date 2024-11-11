@@ -5,48 +5,41 @@ import java.awt.*;
 
 public class MainFrame extends JFrame {
 
-    private CardLayout cardLayout;
-    private JPanel cardPanel;
-
     public MainFrame() {
         setTitle("Gestion de l'école de ski");
         setSize(717, 563);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // layout to change page
-        cardLayout = new CardLayout();
-        cardPanel = new JPanel(cardLayout);
+        // main panel
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(4, 1)); 
 
-        // pannel for main menu
-        JPanel mainMenuPanel = new JPanel(new GridLayout(4, 1));
-
-        // buttons 
+        // buttons for redirection 
         JButton manageInstructorButton = new JButton("Manage Instructor");
         JButton manageSkierButton = new JButton("Manage Skier");
         JButton createLessonButton = new JButton("Create Lesson");
         JButton createBookingButton = new JButton("Create Booking");
 
-        manageInstructorButton.addActionListener(e -> cardLayout.show(cardPanel, "InstructorPanel"));
+        manageInstructorButton.addActionListener(e -> openManageInstructorPage());
 
-        mainMenuPanel.add(manageInstructorButton);
-        mainMenuPanel.add(manageSkierButton);
-        mainMenuPanel.add(createLessonButton);
-        mainMenuPanel.add(createBookingButton);
+        panel.add(manageInstructorButton);
+        panel.add(manageSkierButton);
+        panel.add(createLessonButton);
+        panel.add(createBookingButton);
 
-        // adding main panel to frame
-        cardPanel.add(mainMenuPanel, "MainMenu");
-
-        // adding panel to manage all instructors
-        JPanel instructorPanel = new ManageInstructorsPanel();
-        cardPanel.add(instructorPanel, "InstructorPanel");
-
-        getContentPane().add(cardPanel);
+        getContentPane().add(panel);
 
         setVisible(true);
     }
 
+    private void openManageInstructorPage() {
+        ManageInstructorsPanel manageInstructorsPanel = new ManageInstructorsPanel();
+        setContentPane(manageInstructorsPanel);
+        revalidate();
+    }
+
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(MainFrame::new);
+        SwingUtilities.invokeLater(() -> new MainFrame());
     }
 }
