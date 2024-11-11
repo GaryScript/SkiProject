@@ -15,7 +15,7 @@ public class InstructorDAO {
 
     public static List<Instructor> getAllInstructors() {
         List<Instructor> instructors = new ArrayList<>();
-        Connection conn = OracleDBConnection.getInstance(); // Utilise l'instance singleton
+        Connection conn = OracleDBConnection.getInstance(); 
         Statement stmt = null;
         ResultSet rs = null;
 

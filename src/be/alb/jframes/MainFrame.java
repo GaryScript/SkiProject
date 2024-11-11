@@ -11,11 +11,11 @@ public class MainFrame extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // Panel principal
+        // main panel
         JPanel panel = new JPanel();
         panel.setLayout(new GridLayout(4, 1)); 
 
-        // Boutons pour redirection
+        // buttons for redirection 
         JButton manageInstructorButton = new JButton("Manage Instructor");
         JButton manageSkierButton = new JButton("Manage Skier");
         JButton createLessonButton = new JButton("Create Lesson");
@@ -43,6 +43,7 @@ public class MainFrame extends JFrame {
         this.dispose();
     }
 
+    // 
     // Méthodes pour les autres pages (en fonction de leur implémentation)
     // private void openManageSkierPage() {
     //     new SkierManagementFrame();
@@ -57,8 +58,7 @@ public class MainFrame extends JFrame {
     //     this.dispose();
     // }
 
-    // Méthode main pour démarrer l'application
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new MainFrame()); // Utilisation de lambda
+        SwingUtilities.invokeLater(() -> new MainFrame()); 
     }
 }

@@ -28,4 +28,67 @@ public abstract class Person {
 	}
 	
 	// getter and setter
+	 public int getId() {
+	        return id;
+	    }
+
+	    public void setId(int id) {
+	        this.id = id;
+	    }
+
+	    public String getName() {
+	        return name;
+	    }
+
+	    public void setName(String name) {
+	        this.name = name;
+	    }
+
+	    public String getFirstName() {
+	        return firstName;
+	    }
+
+	    public void setFirstName(String firstName) {
+	        this.firstName = firstName;
+	    }
+
+	    public String getCity() {
+	        return city;
+	    }
+
+	    public void setCity(String city) {
+	        this.city = city;
+	    }
+
+	    public String getPostalCode() {
+	        return postalCode;
+	    }
+
+	    public void setPostalCode(String postalCode) {
+	        this.postalCode = postalCode;
+	    }
+
+	    public String getStreetName() {
+	        return streetName;
+	    }
+
+	    public void setStreetName(String streetName) {
+	        this.streetName = streetName;
+	    }
+
+	    public String getStreetNumber() {
+	        return streetNumber;
+	    }
+
+	    public void setStreetNumber(String streetNumber) {
+	        this.streetNumber = streetNumber;
+	    }
+
+	    public LocalDate getDob() {
+	        return dob;
+	    }
+
+	    public void setDob(LocalDate dob) {
+	        this.dob = dob;
+	    }
 }

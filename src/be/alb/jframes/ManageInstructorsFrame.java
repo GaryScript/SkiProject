@@ -1,42 +1,56 @@
 package be.alb.jframes;
 
-import java.awt.EventQueue;
+import be.alb.controllers.InstructorController;
+import be.alb.models.*;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
+import javax.swing.*;
+import java.awt.*;
+import java.util.List;
 
 public class ManageInstructorsFrame extends JFrame {
+    private InstructorController instructorController;
 
-	private static final long serialVersionUID = 1L;
-	private JPanel contentPane;
+    public ManageInstructorsFrame() {
+    	InstructorController instructorController = new InstructorController();
 
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					ManageInstructorsFrame frame = new ManageInstructorsFrame();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
+        setTitle("Manage Instructors");
+        setSize(600, 400);
+        setLayout(new BorderLayout());
 
-	/**
-	 * Create the frame.
-	 */
-	public ManageInstructorsFrame() {
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 913, 878);
-		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+        // get all the instructors
+        List<Instructor> instructors = instructorController.getAllInstructors();
 
-		setContentPane(contentPane);
-	}
+        if (instructors == null || instructors.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No instructors found.", "Info", JOptionPane.INFORMATION_MESSAGE);
+            return;  // If there are no instructors, exit the method
+        }
 
+        // Prepare the array to display all the instructors
+        String[] columnNames = {"ID", "Nom", "Prénom", "Ville"};
+        
+        // Create an array to hold the data for the JTable
+        Object[][] data = new Object[instructors.size()][columnNames.length];
+
+        // Fill the data array
+        for (int i = 0; i < instructors.size(); i++) {
+            Instructor instructor = instructors.get(i);
+            data[i][0] = instructor.getId();
+            data[i][1] = instructor.getName();
+            data[i][2] = instructor.getFirstName();
+            data[i][3] = instructor.getCity();
+        }
+
+        // Create the table to display the instructors
+        JTable table = new JTable(data, columnNames);
+        add(new JScrollPane(table), BorderLayout.CENTER);
+
+        // Button for creating a new instructor
+        JButton createButton = new JButton("Créer un nouvel instructeur");
+        createButton.addActionListener(e -> {
+            // Logic to create a new instructor
+        });
+        add(createButton, BorderLayout.NORTH);
+
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    }
 }
