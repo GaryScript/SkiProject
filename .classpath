@@ -6,5 +6,8 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="C:/Bac3/Programmation_avancee/Java/Windowsbuilder/BDD_Terry_Pietro/jcalendar-1.4.jar"/>
+	<classpathentry kind="lib" path="C:/Bac3/Programmation_avancee/Java/Windowsbuilder/BDD_Terry_Pietro/ojdbc11.jar"/>
+	<classpathentry kind="lib" path="C:/Bac3/Programmation_avancee/Java/Windowsbuilder/BDD_Terry_Pietro/ucp11.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
