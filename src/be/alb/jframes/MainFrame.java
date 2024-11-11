@@ -39,9 +39,11 @@ public class MainFrame extends JFrame {
     }
 
     private void openManageInstructorPage() {
-        new ManageInstructorsFrame();
-        this.dispose();
+        ManageInstructorsFrame manageInstructorsFrame = new ManageInstructorsFrame();
+        manageInstructorsFrame.setVisible(true); 
+        this.dispose(); 
     }
+
 
     // 
     // Méthodes pour les autres pages (en fonction de leur implémentation)

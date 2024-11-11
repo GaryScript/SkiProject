@@ -26,7 +26,7 @@ public class InstructorDAO {
 
             while (rs.next()) {
                 int id = rs.getInt("instructorId");
-                String name = rs.getString("name");
+                String name = rs.getString("lastName");
                 String firstName = rs.getString("firstName");
                 String city = rs.getString("city");
                 String postalCode = rs.getString("postalCode");
