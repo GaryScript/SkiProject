@@ -32,7 +32,7 @@ public class ManageInstructors extends JFrame {
 	 */
 	public ManageInstructors() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 450, 300);
+		setBounds(100, 100, 913, 878);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 
