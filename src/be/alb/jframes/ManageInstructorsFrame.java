@@ -6,7 +6,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-public class ManageInstructors extends JFrame {
+public class ManageInstructorsFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
@@ -18,7 +18,7 @@ public class ManageInstructors extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					ManageInstructors frame = new ManageInstructors();
+					ManageInstructorsFrame frame = new ManageInstructorsFrame();
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -30,7 +30,7 @@ public class ManageInstructors extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public ManageInstructors() {
+	public ManageInstructorsFrame() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 913, 878);
 		contentPane = new JPanel();
