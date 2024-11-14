@@ -62,10 +62,7 @@ public class Instructor extends Person {
 //                .anyMatch(accreditation -> accreditation.matchesLessonType(lesson.getLessonType()));
 //    }
 
-    // call the dao to get all instructors 
-    public static List<Instructor> getAllInstructors() {
-        return InstructorDAO.getAllInstructors();
-    }
+    
 
     public List<Accreditation> getAccreditations() {
         return accreditations;
@@ -81,6 +78,11 @@ public class Instructor extends Person {
 
     public void setLessons(List<Lesson> lessons) {
         this.lessons = lessons;
+    }
+    
+    // call the dao to get all instructors 
+    public static List<Instructor> getAllInstructors() {
+        return InstructorDAO.getAllInstructors();
     }
     
     public Object createInstructor(int id, String firstName, String lastName, String city, String postalCode, String streetName, String streetNumber, LocalDate dob) {
