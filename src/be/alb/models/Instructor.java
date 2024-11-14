@@ -6,14 +6,25 @@ import java.util.List;
 import be.alb.dao.InstructorDAO;
 
 public class Instructor extends Person {
+	// variables
+	
     private List<Accreditation> accreditations;
     private List<Lesson> lessons;
 
+    // constructors
+    public Instructor(int id, String name, String firstName, String city, String postalCode, String streetName, String streetNumber, LocalDate dob,
+    		List<Accreditation> accreditations, List<Lesson> lessons) {
+        super(id, name, firstName, city, postalCode, streetName, streetNumber, dob);
+        this.accreditations = accreditations;
+        this.lessons = lessons;
+    }
+    
     public Instructor(int id, String name, String firstName, String city, String postalCode, String streetName, String streetNumber, LocalDate dob) {
         super(id, name, firstName, city, postalCode, streetName, streetNumber, dob);
         this.accreditations = new ArrayList<>();
         this.lessons = new ArrayList<>();
     }
+    
 
     public void addLesson(Lesson lesson) {
         if (lesson == null) {
