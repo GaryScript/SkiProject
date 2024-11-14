@@ -85,54 +85,44 @@ public class Instructor extends Person {
         return InstructorDAO.getAllInstructors();
     }
     
-    public Object createInstructor(int id, String firstName, String lastName, String city, String postalCode, String streetName, String streetNumber, LocalDate dob) {
+    public static List<String> createInstructor(int id, String firstName, String lastName, String city, String postalCode, String streetName, String streetNumber, LocalDate dob) {
         List<String> errors = new ArrayList<>();
 
         if (!RegexValidator.isValidName(firstName)) {
             errors.add("Invalid first name.");
         }
-        
         if (!RegexValidator.isValidName(lastName)) {
             errors.add("Invalid last name.");
         }
-
         if (!RegexValidator.isValidCity(city)) {
             errors.add("Invalid city.");
         }
-
         if (!RegexValidator.isValidPostalCode(postalCode)) {
             errors.add("Invalid postal code.");
         }
-
         if (!RegexValidator.isValidStreetName(streetName)) {
             errors.add("Invalid street name.");
         }
-        
         if (!RegexValidator.isValidStreetNumber(streetNumber)) {
             errors.add("Invalid street number.");
         }
-        
         if (!RegexValidator.isValidDob(dob)) {
             errors.add("Invalid dob. Instructor must be at least 18 years old.");
         }
-        
-        // if there are some errors --> return errors
+   
         if (!errors.isEmpty()) {
             return errors;
         }
-        
-        // if no error we create the obj instructor
+
         Instructor newInstructor = new Instructor(id, firstName, lastName, city, postalCode, streetName, streetNumber, dob);
-        
+
         int newInstructorId = InstructorDAO.createInstructor(newInstructor);
-        
-        if (newInstructorId == -1) {  // if something goes wrong in the dao
+        if (newInstructorId == -1) {
             errors.add("Database error: unable to create instructor.");
-            return errors; // return errors
+            return errors;
         }
 
-        // Return the id of the new instructor so the app displays the page of the new instructor the user
-        return newInstructorId;
+        return List.of(String.valueOf(newInstructorId));
     }
 
 }

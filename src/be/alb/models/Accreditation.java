@@ -1,6 +1,10 @@
 package be.alb.models;
 
+import be.alb.dao.*;
+import java.util.List;
 import java.util.Objects;
+
+import be.alb.dao.InstructorDAO;
 
 public class Accreditation {
 	
@@ -31,6 +35,11 @@ public class Accreditation {
 
     public void setName(String name) {
         this.name = name;
+    }
+    
+    // call the dao to get all DAO 
+    public static List<Accreditation> getAllAccreditations() {
+        return AccreditationDAO.getAllAccreditations();
     }
 
     // override equals and hashcode so it works when comparing value and not ref
