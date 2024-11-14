@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import be.alb.dao.InstructorDAO;
+import be.alb.utils.RegexValidator;
 
 public class Instructor extends Person {
 	// variables
@@ -12,15 +13,15 @@ public class Instructor extends Person {
     private List<Lesson> lessons;
 
     // constructors
-    public Instructor(int id, String name, String firstName, String city, String postalCode, String streetName, String streetNumber, LocalDate dob,
+    public Instructor(int id, String firstName, String lastName, String city, String postalCode, String streetName, String streetNumber, LocalDate dob,
     		List<Accreditation> accreditations, List<Lesson> lessons) {
-        super(id, name, firstName, city, postalCode, streetName, streetNumber, dob);
+        super(id, firstName, lastName, city, postalCode, streetName, streetNumber, dob);
         this.accreditations = accreditations;
         this.lessons = lessons;
     }
     
-    public Instructor(int id, String name, String firstName, String city, String postalCode, String streetName, String streetNumber, LocalDate dob) {
-        super(id, name, firstName, city, postalCode, streetName, streetNumber, dob);
+    public Instructor(int id, String firstName, String lastName, String city, String postalCode, String streetName, String streetNumber, LocalDate dob) {
+        super(id, firstName, lastName, city, postalCode, streetName, streetNumber, dob);
         this.accreditations = new ArrayList<>();
         this.lessons = new ArrayList<>();
     }
@@ -81,4 +82,48 @@ public class Instructor extends Person {
     public void setLessons(List<Lesson> lessons) {
         this.lessons = lessons;
     }
+    
+    public List<String> createInstructor(int id, String firstName, String lastName, String city, String postalCode, String streetName, String streetNumber, LocalDate dob) {
+	    List<String> errors = new ArrayList<>();
+	    
+	    if (!(RegexValidator.isValidName(firstName))) {
+	        errors.add("Invalid first name.");
+	    }
+	    
+	    if (!(RegexValidator.isValidName(lastName))) {
+	        errors.add("Invalid last name.");
+	    }
+
+	    if (!(RegexValidator.isValidCity(city))) {
+	        errors.add("Invalid last name.");
+	    }
+
+	    if (!(RegexValidator.isValidPostalCode(postalCode))) {
+	        errors.add("Invalid postal code.");
+	    }
+
+	    if (!(RegexValidator.isValidStreetName(streetName))) {
+	        errors.add("Invalid street name.");
+	    }
+	    
+	    if (!(RegexValidator.isValidStreetNumber(streetNumber))) {
+	        errors.add("Invalid last name.");
+	    }
+	    
+	    if (!(RegexValidator.isValidDob(dob))) {
+	        errors.add("Invalid dob. Instructor cannot be less than 18 years.");
+	    }
+	    
+	    // If no errors, create the Instructor and save it to the database
+	    if (errors.isEmpty()) {
+	        Instructor newInstructor = new Instructor(id, firstName, lastName, city, postalCode, streetName, streetNumber, dob);
+	        boolean result = InstructorDAO.createInstructor(newInstructor); // Call DAO to persist
+
+	        if (!result) {
+	            errors.add("Database error: unable to create instructor.");
+	        }
+	    }
+
+	    return errors; // Return errors or an empty list if successful   
+	}
 }
