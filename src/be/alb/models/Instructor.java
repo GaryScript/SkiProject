@@ -86,43 +86,36 @@ public class Instructor extends Person {
     }
     
     public static List<String> createInstructor(int id, String firstName, String lastName, String city, String postalCode, String streetName, String streetNumber, LocalDate dob) {
-        List<String> errors = new ArrayList<>();
+        List<String> result = new ArrayList<>();
 
-        if (!RegexValidator.isValidName(firstName)) {
-            errors.add("Invalid first name.");
-        }
-        if (!RegexValidator.isValidName(lastName)) {
-            errors.add("Invalid last name.");
-        }
-        if (!RegexValidator.isValidCity(city)) {
-            errors.add("Invalid city.");
-        }
-        if (!RegexValidator.isValidPostalCode(postalCode)) {
-            errors.add("Invalid postal code.");
-        }
-        if (!RegexValidator.isValidStreetName(streetName)) {
-            errors.add("Invalid street name.");
-        }
-        if (!RegexValidator.isValidStreetNumber(streetNumber)) {
-            errors.add("Invalid street number.");
-        }
-        if (!RegexValidator.isValidDob(dob)) {
-            errors.add("Invalid dob. Instructor must be at least 18 years old.");
-        }
-   
-        if (!errors.isEmpty()) {
-            return errors;
+        // validations
+        if (!RegexValidator.isValidName(firstName)) result.add("Prénom invalide.");
+        if (!RegexValidator.isValidName(lastName)) result.add("Nom invalide.");
+        if (!RegexValidator.isValidCity(city)) result.add("Ville invalide.");
+        if (!RegexValidator.isValidPostalCode(postalCode)) result.add("Code postal invalide.");
+        if (!RegexValidator.isValidStreetName(streetName)) result.add("Nom de rue invalide.");
+        if (!RegexValidator.isValidStreetNumber(streetNumber)) result.add("Numéro de rue invalide.");
+        if (!RegexValidator.isValidDob(dob)) result.add("Date de naissance invalide. L'instructeur doit avoir au moins 18 ans.");
+
+        // if there are errors, return 0 
+        if (!result.isEmpty()) {
+            result.add(0, "0");
+            return result;
         }
 
+        // bdd add
         Instructor newInstructor = new Instructor(id, firstName, lastName, city, postalCode, streetName, streetNumber, dob);
-
         int newInstructorId = InstructorDAO.createInstructor(newInstructor);
+
         if (newInstructorId == -1) {
-            errors.add("Database error: unable to create instructor.");
-            return errors;
+            result.add(0, "0");
+            result.add("Erreur de base de données. Impossible de créer l'instructeur.");
+            return result;
         }
 
-        return List.of(String.valueOf(newInstructorId));
+        // everything went fine
+        result.add(0, "1");
+        return result;
     }
 
 }

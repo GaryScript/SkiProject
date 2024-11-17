@@ -7,10 +7,17 @@ import java.awt.*;
 import java.util.List;
 
 public class ManageInstructorsPanel extends JPanel {
-    
-    public ManageInstructorsPanel() {
+
+    private CardLayout cardLayout;
+    private JPanel mainPanel;
+
+    public ManageInstructorsPanel(CardLayout cardLayout, JPanel mainPanel) {
+        this.cardLayout = cardLayout;
+        this.mainPanel = mainPanel;
+
         setLayout(new BorderLayout());
 
+        // Récupérer tous les instructeurs
         List<Instructor> instructors = Instructor.getAllInstructors();
 
         if (instructors == null || instructors.isEmpty()) {
@@ -32,10 +39,23 @@ public class ManageInstructorsPanel extends JPanel {
         JTable table = new JTable(data, columnNames);
         add(new JScrollPane(table), BorderLayout.CENTER);
 
-
+        // Panneau des boutons
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        
+        // Bouton pour créer un nouvel instructeur
         JButton createButton = new JButton("Créer un nouvel instructeur");
         createButton.addActionListener(e -> {
+            CreateInstructorPanel createInstructorPanel = new CreateInstructorPanel(cardLayout, mainPanel);
+            mainPanel.add(createInstructorPanel, "createInstructorPanel");
+            cardLayout.show(mainPanel, "createInstructorPanel");
         });
-        add(createButton, BorderLayout.NORTH);
+        buttonPanel.add(createButton);
+
+        // Bouton pour revenir au menu principal
+        JButton backButton = new JButton("Retour au menu principal");
+        backButton.addActionListener(e -> cardLayout.show(mainPanel, "menuPanel"));
+        buttonPanel.add(backButton);
+
+        add(buttonPanel, BorderLayout.NORTH);
     }
 }

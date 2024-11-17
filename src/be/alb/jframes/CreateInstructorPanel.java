@@ -1,15 +1,15 @@
 package be.alb.jframes;
 
-import be.alb.models.Instructor;
 import be.alb.models.Accreditation;
-import be.alb.dao.AccreditationDAO;
+import be.alb.models.Instructor;
 import be.alb.dao.InstructorDAO;
-import javax.swing.*;
 
 import com.toedter.calendar.JCalendar;
 
+import javax.swing.*;
 import java.awt.*;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,25 +18,30 @@ public class CreateInstructorPanel extends JPanel {
     private JTextField lastNameField, firstNameField, cityField, postalCodeField, streetNameField, streetNumberField;
     private JCalendar dobCalendar;
     private List<JCheckBox> accreditationCheckBoxes;
-    
-    public CreateInstructorPanel() {
-        setLayout(new GridLayout(9, 2, 10, 10)); // GridLayout for the form
 
-        // Add fields for instructor details
+    private CardLayout cardLayout;
+    private JPanel mainPanel;
+    private JPanel errorPanel; // Container for errors
+
+    public CreateInstructorPanel(CardLayout cardLayout, JPanel mainPanel) {
+        this.cardLayout = cardLayout;
+        this.mainPanel = mainPanel;
+
+        setLayout(new BorderLayout()); // Use BorderLayout for better section management
+        JPanel formPanel = new JPanel(new GridLayout(9, 2, 10, 10)); // GridLayout for form fields
+
+        // Initialize fields
         lastNameField = new JTextField();
         firstNameField = new JTextField();
         cityField = new JTextField();
         postalCodeField = new JTextField();
         streetNameField = new JTextField();
         streetNumberField = new JTextField();
-        
-        dobCalendar = new JCalendar(); // Using JCalendar for date of birth
-        
-        // Load all accreditations from the database
+        dobCalendar = new JCalendar();
+
+        // Create checkboxes for accreditations
         List<Accreditation> accreditations = Accreditation.getAllAccreditations();
         accreditationCheckBoxes = new ArrayList<>();
-        
-        // Create checkboxes for each accreditation
         JPanel accreditationPanel = new JPanel();
         accreditationPanel.setLayout(new BoxLayout(accreditationPanel, BoxLayout.Y_AXIS));
         for (Accreditation accreditation : accreditations) {
@@ -45,72 +50,92 @@ public class CreateInstructorPanel extends JPanel {
             accreditationPanel.add(checkBox);
         }
 
-        // Add all components to the form
-        add(new JLabel("Nom:"));
-        add(lastNameField);
-
-        add(new JLabel("Prénom:"));
-        add(firstNameField);
-
-        add(new JLabel("Ville:"));
-        add(cityField);
-
-        add(new JLabel("Code Postal:"));
-        add(postalCodeField);
-
-        add(new JLabel("Nom de rue:"));
-        add(streetNameField);
-
-        add(new JLabel("Numéro de rue:"));
-        add(streetNumberField);
-
-        add(new JLabel("Date de naissance:"));
-        add(dobCalendar);
-
-        add(new JLabel("Accréditations:"));
-        add(accreditationPanel);
+        // Add components to the form
+        formPanel.add(new JLabel("Nom:"));
+        formPanel.add(lastNameField);
+        formPanel.add(new JLabel("Prénom:"));
+        formPanel.add(firstNameField);
+        formPanel.add(new JLabel("Ville:"));
+        formPanel.add(cityField);
+        formPanel.add(new JLabel("Code Postal:"));
+        formPanel.add(postalCodeField);
+        formPanel.add(new JLabel("Nom de rue:"));
+        formPanel.add(streetNameField);
+        formPanel.add(new JLabel("Numéro de rue:"));
+        formPanel.add(streetNumberField);
+        formPanel.add(new JLabel("Date de naissance:"));
+        formPanel.add(dobCalendar);
+        formPanel.add(new JLabel("Accréditations:"));
+        formPanel.add(new JScrollPane(accreditationPanel));
 
         // Submit button
         JButton submitButton = new JButton("Créer l'instructeur");
         submitButton.addActionListener(e -> createInstructor());
-        add(submitButton);
+        formPanel.add(submitButton);
+
+        // Back button
+        JButton backButton = new JButton("Retour");
+        backButton.addActionListener(e -> cardLayout.show(mainPanel, "manageInstructorsPanel"));
+        formPanel.add(backButton);
+
+        // Error container
+        errorPanel = new JPanel();
+        errorPanel.setLayout(new BoxLayout(errorPanel, BoxLayout.Y_AXIS)); // Stack errors vertically
+        errorPanel.setVisible(false); // Hide errors by default
+
+        // Add form and error panel to the main layout
+        add(formPanel, BorderLayout.CENTER);
+        add(errorPanel, BorderLayout.NORTH);
     }
 
     private void createInstructor() {
-        String lastName = lastNameField.getText();
-        String firstName = firstNameField.getText();
-        String city = cityField.getText();
-        String postalCode = postalCodeField.getText();
-        String streetName = streetNameField.getText();
-        String streetNumber = streetNumberField.getText();
-        java.util.Date dobDate = dobCalendar.getDate();
-        LocalDate dob = new java.sql.Date(dobDate.getTime()).toLocalDate(); // Convertir en LocalDate
+        // Collect data from the form
+        String firstName = firstNameField.getText().trim();
+        String lastName = lastNameField.getText().trim();
+        String city = cityField.getText().trim();
+        String postalCode = postalCodeField.getText().trim();
+        String streetName = streetNameField.getText().trim();
+        String streetNumber = streetNumberField.getText().trim();
+        LocalDate dob = dobCalendar.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 
- 
-        List<String> errors = Instructor.createInstructor(0, firstName, lastName, city, postalCode, streetName, streetNumber, dob);
+        List<String> result = Instructor.createInstructor(0, firstName, lastName, city, postalCode, streetName, streetNumber, dob);
 
-        if (!errors.isEmpty()) {
- 
-            String errorMessage = String.join("\n", errors);
-            JOptionPane.showMessageDialog(this, errorMessage, "Erreur", JOptionPane.ERROR_MESSAGE);
-            return;
+        // Check if everything went well or if there are errors
+        if (result.get(0).equals("1")) {
+            // Success
+            JOptionPane.showMessageDialog(this, "Instructor created successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            goToManageInstructorPanel();
+        } else {
+            // Errors
+            result.remove(0); 
+            displayFieldErrors(result);
         }
-
-        Instructor createdInstructor = InstructorDAO.getInstructorByName(firstName, lastName);
-
-        List<Accreditation> selectedAccreditations = new ArrayList<>();
-        for (int i = 0; i < accreditationCheckBoxes.size(); i++) {
-            if (accreditationCheckBoxes.get(i).isSelected()) {
-                selectedAccreditations.add(AccreditationDAO.getAccreditationById(i + 1)); 
-            }
-        }
-
-        // Ajouter les accréditations à l'instructeur dans la base de données
-        for (Accreditation accreditation : selectedAccreditations) {
-            InstructorDAO.addAccreditationToInstructor(createdInstructor.getId(), accreditation.getId());
-        }
-
-        JOptionPane.showMessageDialog(this, "Instructeur créé avec succès !");
     }
 
+    // Method to navigate back to the manage instructors panel
+    private void goToManageInstructorPanel() {
+        ManageInstructorsPanel manageInstructorsPanel = new ManageInstructorsPanel(cardLayout, mainPanel);
+        JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        frame.setContentPane(manageInstructorsPanel);
+        frame.revalidate();
+    }
+
+    // Display errors above the relevant form fields
+    private void displayFieldErrors(List<String> errors) {
+        // Hide error panel initially
+        errorPanel.removeAll();
+        errorPanel.setVisible(true);
+
+        // Display errors for each field
+        for (String error : errors) {
+            JLabel errorLabel = new JLabel(error);
+            errorLabel.setForeground(Color.RED);
+            errorLabel.setFont(new Font("Arial", Font.PLAIN, 10));
+            errorPanel.add(errorLabel);
+        }
+
+        // Revalidate and repaint to ensure errors are displayed correctly
+        errorPanel.revalidate();
+        errorPanel.repaint();
+    }
 }
