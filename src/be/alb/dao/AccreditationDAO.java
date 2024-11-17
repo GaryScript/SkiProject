@@ -20,7 +20,7 @@ public class AccreditationDAO {
 
         try {
             
-            String query = "SELECT * FROM Accreditation";
+            String query = "SELECT * FROM accreditations";
             stmt = conn.createStatement();
             rs = stmt.executeQuery(query);
 
