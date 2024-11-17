@@ -130,7 +130,10 @@ public class CreateInstructorPanel extends JPanel {
         for (String error : errors) {
             JLabel errorLabel = new JLabel(error);
             errorLabel.setForeground(Color.RED);
-            errorLabel.setFont(new Font("Arial", Font.PLAIN, 10));
+            errorLabel.setFont(new Font("Arial", Font.BOLD, 14)); // Increased font size and bold for better visibility
+            errorLabel.setOpaque(true); // Make background visible
+            errorLabel.setBackground(new Color(255, 240, 240)); // Soft red background
+            errorLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5)); // Add padding around error text
             errorPanel.add(errorLabel);
         }
 
