@@ -57,94 +57,79 @@ public class InstructorDAO {
 
     
 	public static int createInstructor(Instructor instructor, List<Integer> accreditationIds) {
-	    Connection conn = OracleDBConnection.getInstance();
-	    PreparedStatement pstmt = null;
-	    ResultSet rs = null;
+        Connection conn = OracleDBConnection.getInstance();
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
 
-	    try {
-	        // Démarrer une transaction
-	        conn.setAutoCommit(false); // Désactive le commit automatique
+        try {
+            // Démarrer une transaction
+            conn.setAutoCommit(false); // Désactive le commit automatique
 
-	        // Insertion de l'instructeur dans la table
-	        String query = "INSERT INTO Instructors (instructorid, lastName, firstName, city, postalCode, streetName, streetNumber, dob) " +
-	                       "VALUES (INSTRUCTOR_SEQ.NEXTVAL, ?, ?, ?, ?, ?, ?, ?)";
-	        pstmt = conn.prepareStatement(query);
-	        pstmt.setString(1, instructor.getLastName());
-	        pstmt.setString(2, instructor.getFirstName());
-	        pstmt.setString(3, instructor.getCity());
-	        pstmt.setString(4, instructor.getPostalCode());
-	        pstmt.setString(5, instructor.getStreetName());
-	        pstmt.setString(6, instructor.getStreetNumber());
-	        pstmt.setDate(7, Date.valueOf(instructor.getDob()));
+            // Insertion de l'instructeur
+            String query = "INSERT INTO Instructors (instructorid, lastName, firstName, city, postalCode, streetName, streetNumber, dob) " +
+                           "VALUES (INSTRUCTOR_SEQ.NEXTVAL, ?, ?, ?, ?, ?, ?, ?)";
+            pstmt = conn.prepareStatement(query);
+            pstmt.setString(1, instructor.getLastName());
+            pstmt.setString(2, instructor.getFirstName());
+            pstmt.setString(3, instructor.getCity());
+            pstmt.setString(4, instructor.getPostalCode());
+            pstmt.setString(5, instructor.getStreetName());
+            pstmt.setString(6, instructor.getStreetNumber());
+            pstmt.setDate(7, Date.valueOf(instructor.getDob()));
 
-	        int affectedRows = pstmt.executeUpdate();
+            int affectedRows = pstmt.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("Creating instructor failed, no rows affected.");
+            }
 
-	        if (affectedRows == 0) {
-	            throw new SQLException("Creating instructor failed, no rows affected.");
-	        }
+            // Obtenir l'ID de l'instructeur
+            String selectQuery = "SELECT INSTRUCTORID FROM Instructors WHERE lastName = ? AND firstName = ? AND dob = ?";
+            pstmt = conn.prepareStatement(selectQuery);
+            pstmt.setString(1, instructor.getLastName());
+            pstmt.setString(2, instructor.getFirstName());
+            pstmt.setDate(3, Date.valueOf(instructor.getDob()));
 
-	        // Obtenir l'ID de l'instructeur
-	        String selectQuery = "SELECT INSTRUCTORID FROM Instructors WHERE lastName = ? AND firstName = ? AND dob = ?";
-	        pstmt = conn.prepareStatement(selectQuery);
-	        pstmt.setString(1, instructor.getLastName());
-	        pstmt.setString(2, instructor.getFirstName());
-	        pstmt.setDate(3, Date.valueOf(instructor.getDob()));  // Utilise la même date de naissance pour identifier l'instructeur
+            rs = pstmt.executeQuery();
+            int instructorId = -1;
+            if (rs.next()) {
+                instructorId = rs.getInt("INSTRUCTORID");
+            } else {
+                throw new SQLException("Instructor creation failed, no ID found.");
+            }
 
-	        rs = pstmt.executeQuery();
-	        int instructorId = -1;
-	        if (rs.next()) {
-	            instructorId = rs.getInt("INSTRUCTORID"); // Récupérer l'ID de l'instructeur
-	        } else {
-	            throw new SQLException("Instructor creation failed, no ID found.");
-	        }
+            // Appeler la méthode d'ajout des accréditations
+            boolean accreditationSuccess = AccreditationDAO.addAccreditationsToInstructor(conn, instructorId, accreditationIds);
+            if (!accreditationSuccess) {
+                throw new SQLException("Failed to add accreditations to instructor.");
+            }
 
-	        // Ajouter les accréditations à l'instructeur
-	        String accreditationQuery = "INSERT INTO InstructorAccreditation (INSTRUCTORACCREDITATIONID, INSTRUCTORID, ACCREDITATIONID) " +
-	                                    "VALUES (INSTRUCTORACCREDITATION_SEQ.NEXTVAL, ?, ?)";
-	        pstmt = conn.prepareStatement(accreditationQuery);
+            // Commit de la transaction si tout est ok
+            conn.commit();
 
-	        for (Integer accreditationId : accreditationIds) {
-	            pstmt.setInt(1, instructorId);
-	            pstmt.setInt(2, accreditationId);
-	            pstmt.addBatch();  // Prépare l'ajout dans un batch
-	        }
+            return instructorId; // Retourner l'ID de l'instructeur nouvellement créé
 
-	        int[] updateCounts = pstmt.executeBatch(); // Exécuter le batch
+        } catch (SQLException e) {
+            // En cas d'erreur, rollback de la transaction
+            try {
+                if (conn != null) {
+                    conn.rollback();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            e.printStackTrace();
+            return -1;
 
-	        // Vérifier si l'ajout des accréditations s'est bien passé
-	        for (int count : updateCounts) {
-	            if (count == 0) {
-	                throw new SQLException("Failed to add accreditation to instructor.");
-	            }
-	        }
-
-	        // Commit de la transaction si tout est ok
-	        conn.commit();
-
-	        return instructorId; // Retourner l'ID de l'instructeur nouvellement créé
-
-	    } catch (SQLException e) {
-	        // En cas d'erreur, rollback de la transaction
-	        try {
-	            if (conn != null) {
-	                conn.rollback();
-	            }
-	        } catch (SQLException ex) {
-	            ex.printStackTrace();
-	        }
-	        e.printStackTrace();
-	        return -1;
-	    } finally {
-	        try {
-	            if (rs != null) rs.close();
-	            if (pstmt != null) pstmt.close();
-	            if (conn != null) {
-	                conn.setAutoCommit(true); // Réactive le commit automatique après la transaction
-	            }
-	        } catch (SQLException e) {
-	            e.printStackTrace();
-	        }
-	    }
-	}
-
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (pstmt != null) pstmt.close();
+                if (conn != null) {
+                    conn.setAutoCommit(true); // Réactive le commit automatique après la transaction
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }

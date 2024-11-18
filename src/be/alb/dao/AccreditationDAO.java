@@ -4,6 +4,7 @@ import be.alb.models.*;
 import be.alb.database.OracleDBConnection;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -45,5 +46,42 @@ public class AccreditationDAO {
         }
 
         return accreditations;  
+    }
+	
+	 static boolean addAccreditationsToInstructor(Connection conn, int instructorId, List<Integer> accreditationIds) {
+	        PreparedStatement pstmt = null;
+
+	        try {
+	            String accreditationQuery = "INSERT INTO InstructorAccreditation (INSTRUCTORACCREDITATIONID, INSTRUCTORID, ACCREDITATIONID) " +
+	                                        "VALUES (INSTRUCTORACCREDITATION_SEQ.NEXTVAL, ?, ?)";
+	            pstmt = conn.prepareStatement(accreditationQuery);
+
+	            for (Integer accreditationId : accreditationIds) {
+	                pstmt.setInt(1, instructorId);
+	                pstmt.setInt(2, accreditationId);
+	                pstmt.addBatch();  // Prépare l'ajout dans un batch
+	            }
+
+	            int[] updateCounts = pstmt.executeBatch(); // Exécution du batch
+
+	            // Vérifier si l'ajout des accréditations s'est bien passé
+	            for (int count : updateCounts) {
+	                if (count == 0) {
+	                    throw new SQLException("Failed to add accreditation to instructor.");
+	                }
+	            }
+
+	            return true; // Succès
+
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	            return false; // Erreur lors de l'ajout des accréditations
+	        } finally {
+	            try {
+	                if (pstmt != null) pstmt.close();
+	            } catch (SQLException e) {
+	                e.printStackTrace();
+	            }
+	        }
     }
 }
