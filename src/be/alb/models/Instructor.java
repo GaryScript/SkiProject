@@ -85,7 +85,7 @@ public class Instructor extends Person {
         return InstructorDAO.getAllInstructors();
     }
     
-    public static List<String> createInstructor(String firstName, String lastName, String city, String postalCode, String streetName, String streetNumber, LocalDate dob) {
+    public static List<String> createInstructor(String firstName, String lastName, String city, String postalCode, String streetName, String streetNumber, LocalDate dob, List<Integer> accreditationIds) {
         List<String> result = new ArrayList<>();
 
         // validations
@@ -105,7 +105,7 @@ public class Instructor extends Person {
 
         // bdd add
         Instructor newInstructor = new Instructor(0, firstName, lastName, city, postalCode, streetName, streetNumber, dob);
-        int newInstructorId = InstructorDAO.createInstructor(newInstructor);
+        int newInstructorId = InstructorDAO.createInstructor(newInstructor, accreditationIds);
 
         if (newInstructorId == -1) {
             result.add(0, "0");

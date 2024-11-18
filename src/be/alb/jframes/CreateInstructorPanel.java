@@ -90,30 +90,39 @@ public class CreateInstructorPanel extends JPanel {
     }
 
     private void createInstructor() {
-        try {
-            // Collect data from the form
-            String firstName = firstNameField.getText().trim();
-            String lastName = lastNameField.getText().trim();
-            String city = cityField.getText().trim();
-            String postalCode = postalCodeField.getText().trim();
-            String streetName = streetNameField.getText().trim();
-            String streetNumber = streetNumberField.getText().trim();
-            LocalDate dob = extractDateOnly(dobCalendar.getDate()); // Extract the date cleanly
+        String firstName = firstNameField.getText().trim();
+        String lastName = lastNameField.getText().trim();
+        String city = cityField.getText().trim();
+        String postalCode = postalCodeField.getText().trim();
+        String streetName = streetNameField.getText().trim();
+        String streetNumber = streetNumberField.getText().trim();
+        LocalDate dob = extractDateOnly(dobCalendar.getDate());  // Extraction de la date
 
-            // Business logic
-            List<String> result = Instructor.createInstructor(firstName, lastName, city, postalCode, streetName, streetNumber, dob);
-
-            if (result.get(0).equals("1")) {
-                JOptionPane.showMessageDialog(this, "Instructor created successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                goToManageInstructorPanel();
-            } else {
-                result.remove(0);
-                displayFieldErrors(result);
+        // Récupérer les accréditations sélectionnées
+        List<Integer> selectedAccreditations = new ArrayList<>();
+        for (int i = 0; i < accreditationCheckBoxes.size(); i++) {
+            JCheckBox checkBox = accreditationCheckBoxes.get(i);
+            if (checkBox.isSelected()) {
+                Accreditation accreditation = Accreditation.getAllAccreditations().get(i);
+                selectedAccreditations.add(accreditation.getAccreditationID());
             }
-        } catch (IllegalArgumentException e) {
-            displayFieldErrors(List.of(e.getMessage()));
+        }
+
+        // Appel de la méthode DAO pour créer l'instructeur et ajouter les accréditations
+        List<String> result = Instructor.createInstructor(firstName, lastName, city, postalCode, streetName, streetNumber, dob, selectedAccreditations);
+
+        if (result.get(0).equals("1")) {
+            JOptionPane.showMessageDialog(this, "Instructor created successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            goToManageInstructorPanel();
+        } else {
+            StringBuilder errorMessage = new StringBuilder("An error occurred:\n");
+            for (int i = 1; i < result.size(); i++) {
+                errorMessage.append(result.get(i)).append("\n");
+            }
+            JOptionPane.showMessageDialog(this, errorMessage.toString(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+
 
     // Method to navigate back to the manage instructors panel
     private void goToManageInstructorPanel() {
