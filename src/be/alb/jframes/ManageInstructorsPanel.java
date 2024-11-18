@@ -1,21 +1,23 @@
 package be.alb.jframes;
 
-import be.alb.controllers.InstructorController;
-import be.alb.models.*;
+import be.alb.models.Instructor;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
-public class ManageInstructorsPanel extends JPanel { // Change JFrame to JPanel
-    private InstructorController instructorController;
+public class ManageInstructorsPanel extends JPanel {
 
-    public ManageInstructorsPanel() { // Correct constructor for ManageInstructorsPanel
-        instructorController = new InstructorController();
+    private CardLayout cardLayout;
+    private JPanel mainPanel;
+
+    public ManageInstructorsPanel(CardLayout cardLayout, JPanel mainPanel) {
+        this.cardLayout = cardLayout;
+        this.mainPanel = mainPanel;
+
         setLayout(new BorderLayout());
 
-
-        List<Instructor> instructors = instructorController.getAllInstructors();
+        List<Instructor> instructors = Instructor.getAllInstructors();
 
         if (instructors == null || instructors.isEmpty()) {
             JOptionPane.showMessageDialog(this, "No instructors found.", "Info", JOptionPane.INFORMATION_MESSAGE);
@@ -28,19 +30,32 @@ public class ManageInstructorsPanel extends JPanel { // Change JFrame to JPanel
         for (int i = 0; i < instructors.size(); i++) {
             Instructor instructor = instructors.get(i);
             data[i][0] = instructor.getId();
-            data[i][1] = instructor.getName();
+            data[i][1] = instructor.getLastName(); 
             data[i][2] = instructor.getFirstName();
             data[i][3] = instructor.getCity();
         }
-
-
+        
+        
         JTable table = new JTable(data, columnNames);
         add(new JScrollPane(table), BorderLayout.CENTER);
 
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        
+        // button to create instructor 
         JButton createButton = new JButton("Créer un nouvel instructeur");
         createButton.addActionListener(e -> {
-        		// todo
+            CreateInstructorPanel createInstructorPanel = new CreateInstructorPanel(cardLayout, mainPanel);
+            mainPanel.add(createInstructorPanel, "createInstructorPanel");
+            cardLayout.show(mainPanel, "createInstructorPanel");
         });
-        add(createButton, BorderLayout.NORTH);
+        buttonPanel.add(createButton);
+
+        // button to go back to main menu
+        JButton backButton = new JButton("Retour au menu principal");
+        backButton.addActionListener(e -> cardLayout.show(mainPanel, "menuPanel"));
+        buttonPanel.add(backButton);
+
+        add(buttonPanel, BorderLayout.NORTH);
     }
 }

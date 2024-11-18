@@ -6,8 +6,8 @@ public abstract class Person {
 	
 	// variables
 	private int id;
-	private String name;
 	private String firstName;
+	private String lastName;
 	private String city;
 	private String postalCode;
 	private String streetName;
@@ -16,10 +16,10 @@ public abstract class Person {
 	
 	// constructor
 	
-	public Person(int id, String name, String firstName, String city, String postalCode, String streetName, String streetNumber, LocalDate dob) {
+	public Person(int id, String firstName, String lastName, String city, String postalCode, String streetName, String streetNumber, LocalDate dob) {
 		this.id = id;
-		this.name = name; 
-		this.firstName = name; 
+		this.firstName = firstName; 
+		this.lastName = lastName; 
 		this.city = city;
 		this.postalCode = postalCode;
 		this.streetName = streetName;
@@ -36,20 +36,20 @@ public abstract class Person {
 	        this.id = id;
 	    }
 
-	    public String getName() {
-	        return name;
-	    }
-
-	    public void setName(String name) {
-	        this.name = name;
-	    }
-
 	    public String getFirstName() {
 	        return firstName;
 	    }
 
 	    public void setFirstName(String firstName) {
 	        this.firstName = firstName;
+	    }
+	    
+	    public String getLastName() {
+	        return firstName;
+	    }
+
+	    public void setLastName(String name) {
+	        this.lastName = name;
 	    }
 
 	    public String getCity() {

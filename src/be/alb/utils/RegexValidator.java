@@ -1,5 +1,7 @@
 package be.alb.utils;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.regex.Pattern;
 
 public class RegexValidator {
@@ -41,5 +43,14 @@ public class RegexValidator {
 
     public static boolean isValidStreetNumber(String streetNumber) {
         return streetNumber != null && STREET_NUMBER_PATTERN.matcher(streetNumber).matches();
+    }
+    
+    public static boolean isValidDob(LocalDate dob) {
+        if (dob == null) {
+            return false;
+        }
+        LocalDate today = LocalDate.now();
+        
+        return dob.isBefore(today) && Period.between(dob, today).getYears() >= 18;
     }
 }
