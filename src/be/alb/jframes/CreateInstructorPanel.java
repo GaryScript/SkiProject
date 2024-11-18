@@ -96,9 +96,9 @@ public class CreateInstructorPanel extends JPanel {
         String postalCode = postalCodeField.getText().trim();
         String streetName = streetNameField.getText().trim();
         String streetNumber = streetNumberField.getText().trim();
-        LocalDate dob = extractDateOnly(dobCalendar.getDate());  // Extraction de la date
+        LocalDate dob = extractDateOnly(dobCalendar.getDate());  // date extraction
 
-        // Récupérer les accréditations sélectionnées
+        // get the checked accreds
         List<Integer> selectedAccreditations = new ArrayList<>();
         for (int i = 0; i < accreditationCheckBoxes.size(); i++) {
             JCheckBox checkBox = accreditationCheckBoxes.get(i);
@@ -108,7 +108,7 @@ public class CreateInstructorPanel extends JPanel {
             }
         }
 
-        // Appel de la méthode DAO pour créer l'instructeur et ajouter les accréditations
+        // create instructor and accreds
         List<String> result = Instructor.createInstructor(firstName, lastName, city, postalCode, streetName, streetNumber, dob, selectedAccreditations);
 
         if (result.get(0).equals("1")) {

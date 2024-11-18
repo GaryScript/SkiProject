@@ -14,11 +14,11 @@ public class MainFrame extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // Initialiser le CardLayout
+        // init the cardlayout
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
 
-        // Panneau principal avec les boutons
+        // main page with main buttons
         JPanel menuPanel = new JPanel(new GridLayout(4, 1));
         JButton manageInstructorButton = new JButton("Manage Instructor");
         JButton manageSkierButton = new JButton("Manage Skier");
@@ -31,17 +31,15 @@ public class MainFrame extends JFrame {
         menuPanel.add(createLessonButton);
         menuPanel.add(createBookingButton);
 
-        // Ajouter les panneaux au CardLayout
+        // add panels
         mainPanel.add(menuPanel, "menuPanel");
 
-        // Ajouter le panneau principal à la fenêtre
         getContentPane().add(mainPanel);
 
         setVisible(true);
     }
 
     private void openManageInstructorPage() {
-        // Ajouter ManageInstructorsPanel au CardLayout
         ManageInstructorsPanel manageInstructorsPanel = new ManageInstructorsPanel(cardLayout, mainPanel);
         mainPanel.add(manageInstructorsPanel, "manageInstructorsPanel");
         cardLayout.show(mainPanel, "manageInstructorsPanel");

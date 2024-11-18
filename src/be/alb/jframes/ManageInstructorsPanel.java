@@ -17,7 +17,6 @@ public class ManageInstructorsPanel extends JPanel {
 
         setLayout(new BorderLayout());
 
-        // Récupérer tous les instructeurs
         List<Instructor> instructors = Instructor.getAllInstructors();
 
         if (instructors == null || instructors.isEmpty()) {
@@ -40,10 +39,10 @@ public class ManageInstructorsPanel extends JPanel {
         JTable table = new JTable(data, columnNames);
         add(new JScrollPane(table), BorderLayout.CENTER);
 
-        // Panneau des boutons
+
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         
-        // Bouton pour créer un nouvel instructeur
+        // button to create instructor 
         JButton createButton = new JButton("Créer un nouvel instructeur");
         createButton.addActionListener(e -> {
             CreateInstructorPanel createInstructorPanel = new CreateInstructorPanel(cardLayout, mainPanel);
@@ -52,7 +51,7 @@ public class ManageInstructorsPanel extends JPanel {
         });
         buttonPanel.add(createButton);
 
-        // Bouton pour revenir au menu principal
+        // button to go back to main menu
         JButton backButton = new JButton("Retour au menu principal");
         backButton.addActionListener(e -> cardLayout.show(mainPanel, "menuPanel"));
         buttonPanel.add(backButton);

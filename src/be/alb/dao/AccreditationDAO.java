@@ -59,23 +59,22 @@ public class AccreditationDAO {
 	            for (Integer accreditationId : accreditationIds) {
 	                pstmt.setInt(1, instructorId);
 	                pstmt.setInt(2, accreditationId);
-	                pstmt.addBatch();  // Prépare l'ajout dans un batch
+	                pstmt.addBatch(); 
 	            }
 
-	            int[] updateCounts = pstmt.executeBatch(); // Exécution du batch
-
-	            // Vérifier si l'ajout des accréditations s'est bien passé
+	            int[] updateCounts = pstmt.executeBatch();
+	            // checks if it worked
 	            for (int count : updateCounts) {
 	                if (count == 0) {
 	                    throw new SQLException("Failed to add accreditation to instructor.");
 	                }
 	            }
 
-	            return true; // Succès
+	            return true; // mean success
 
 	        } catch (SQLException e) {
 	            e.printStackTrace();
-	            return false; // Erreur lors de l'ajout des accréditations
+	            return false; // mean an error has occured 
 	        } finally {
 	            try {
 	                if (pstmt != null) pstmt.close();

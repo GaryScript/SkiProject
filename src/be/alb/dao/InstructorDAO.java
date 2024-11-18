@@ -62,10 +62,9 @@ public class InstructorDAO {
         ResultSet rs = null;
 
         try {
-            // Démarrer une transaction
-            conn.setAutoCommit(false); // Désactive le commit automatique
+            conn.setAutoCommit(false); // Disable the automatic commit (so we can rollback)
 
-            // Insertion de l'instructeur
+            // first step: add the instructor
             String query = "INSERT INTO Instructors (instructorid, lastName, firstName, city, postalCode, streetName, streetNumber, dob) " +
                            "VALUES (INSTRUCTOR_SEQ.NEXTVAL, ?, ?, ?, ?, ?, ?, ?)";
             pstmt = conn.prepareStatement(query);
@@ -82,7 +81,7 @@ public class InstructorDAO {
                 throw new SQLException("Creating instructor failed, no rows affected.");
             }
 
-            // Obtenir l'ID de l'instructeur
+            // get the id of the new instructor
             String selectQuery = "SELECT INSTRUCTORID FROM Instructors WHERE lastName = ? AND firstName = ? AND dob = ?";
             pstmt = conn.prepareStatement(selectQuery);
             pstmt.setString(1, instructor.getLastName());
@@ -97,19 +96,19 @@ public class InstructorDAO {
                 throw new SQLException("Instructor creation failed, no ID found.");
             }
 
-            // Appeler la méthode d'ajout des accréditations
+            // add accreditations
             boolean accreditationSuccess = AccreditationDAO.addAccreditationsToInstructor(conn, instructorId, accreditationIds);
             if (!accreditationSuccess) {
                 throw new SQLException("Failed to add accreditations to instructor.");
             }
 
-            // Commit de la transaction si tout est ok
+            // commit if everything went fine
             conn.commit();
 
-            return instructorId; // Retourner l'ID de l'instructeur nouvellement créé
+            return instructorId;
 
         } catch (SQLException e) {
-            // En cas d'erreur, rollback de la transaction
+            // if error -> rollback
             try {
                 if (conn != null) {
                     conn.rollback();
@@ -125,7 +124,7 @@ public class InstructorDAO {
                 if (rs != null) rs.close();
                 if (pstmt != null) pstmt.close();
                 if (conn != null) {
-                    conn.setAutoCommit(true); // Réactive le commit automatique après la transaction
+                    conn.setAutoCommit(true); // re active the commit
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
