@@ -9,58 +9,63 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 public class InstructorDAO {
 
-    public static List<Instructor> getAllInstructors() {
-        List<Instructor> instructors = new ArrayList<>();
-        Connection conn = OracleDBConnection.getInstance(); 
-        Statement stmt = null;
-        ResultSet rs = null;
+	public static List<Instructor> getAllInstructors() {
+	    List<Instructor> instructors = new ArrayList<>();
+	    Connection conn = OracleDBConnection.getInstance(); 
+	    Statement stmt = null;
+	    ResultSet rs = null;
 
-        try {
-            String query = "SELECT * FROM Instructors";
-            stmt = conn.createStatement();
-            rs = stmt.executeQuery(query);
+	    try {
+	        String query = "SELECT * FROM Instructors";
+	        stmt = conn.createStatement();
+	        rs = stmt.executeQuery(query);
 
-            while (rs.next()) {
-                int id = rs.getInt("instructorId");
-                String name = rs.getString("lastName");
-                String firstName = rs.getString("firstName");
-                String city = rs.getString("city");
-                String postalCode = rs.getString("postalCode");
-                String streetName = rs.getString("streetName");
-                String streetNumber = rs.getString("streetNumber");
-                Date dob = rs.getDate("dob");
+	        while (rs.next()) {
+	            int id = rs.getInt("instructorId");
+	            String name = rs.getString("lastName");
+	            String firstName = rs.getString("firstName");
+	            String city = rs.getString("city");
+	            String postalCode = rs.getString("postalCode");
+	            String streetName = rs.getString("streetName");
+	            String streetNumber = rs.getString("streetNumber");
+	            Date dob = rs.getDate("dob");
 
-                Instructor instructor = new Instructor(id, name, firstName, city, postalCode, streetName, streetNumber, dob.toLocalDate());
-                instructors.add(instructor);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (rs != null) rs.close();
-                if (stmt != null) stmt.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
+	            LocalDate localDob = (dob != null) ? dob.toLocalDate() : null;
 
-        return instructors;
-    }
+	            Instructor instructor = new Instructor(id, name, firstName, city, postalCode, streetName, streetNumber, localDob);
+	            instructors.add(instructor);
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    } finally {
+	        try {
+	            if (rs != null) rs.close();
+	            if (stmt != null) stmt.close();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
+
+	    return instructors;
+	}
+
     
     public static int createInstructor(Instructor instructor) {
         Connection conn = OracleDBConnection.getInstance();
         PreparedStatement pstmt = null;
-        ResultSet generatedKeys = null;
-        
+        ResultSet rs = null;
+
         try {
-            String query = "INSERT INTO Instructors (lastName, firstName, city, postalCode, streetName, streetNumber, dob) VALUES (?, ?, ?, ?, ?, ?, ?)";
-            pstmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
-            
+            // Insertion de l'instructeur dans la table
+            String query = "INSERT INTO Instructors (instructorid, lastName, firstName, city, postalCode, streetName, streetNumber, dob) " +
+                           "VALUES (INSTRUCTOR_SEQ.NEXTVAL, ?, ?, ?, ?, ?, ?, ?)";
+            pstmt = conn.prepareStatement(query);
             pstmt.setString(1, instructor.getLastName());
             pstmt.setString(2, instructor.getFirstName());
             pstmt.setString(3, instructor.getCity());
@@ -75,23 +80,32 @@ public class InstructorDAO {
                 throw new SQLException("Creating instructor failed, no rows affected.");
             }
 
-            generatedKeys = pstmt.getGeneratedKeys(); // this function returns the primary key that has been just created, really usefull to view the new instructor we've just been created
-            if (generatedKeys.next()) {
-                return generatedKeys.getInt(1); 
+            // Maintenant, obtenir l'ID de l'instructeur en utilisant une requête SELECT
+            String selectQuery = "SELECT INSTRUCTORID FROM Instructors WHERE lastName = ? AND firstName = ? AND dob = ?";
+            pstmt = conn.prepareStatement(selectQuery);
+            pstmt.setString(1, instructor.getLastName());
+            pstmt.setString(2, instructor.getFirstName());
+            pstmt.setDate(3, Date.valueOf(instructor.getDob()));  // Utilise la même date de naissance pour identifier l'instructeur
+
+            rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("INSTRUCTORID"); // Retourner l'ID de l'instructeur nouvellement créé
             } else {
-                throw new SQLException("Creating instructor failed, no ID obtained.");
+                throw new SQLException("Instructor creation failed, no ID found.");
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
-            return -1; // means something went wrong
+            return -1;
         } finally {
             try {
-                if (generatedKeys != null) generatedKeys.close();
+                if (rs != null) rs.close();
                 if (pstmt != null) pstmt.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         }
     }
+
+
 }

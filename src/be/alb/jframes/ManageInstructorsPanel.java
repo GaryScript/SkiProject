@@ -35,7 +35,8 @@ public class ManageInstructorsPanel extends JPanel {
             data[i][2] = instructor.getFirstName();
             data[i][3] = instructor.getCity();
         }
-
+        
+        
         JTable table = new JTable(data, columnNames);
         add(new JScrollPane(table), BorderLayout.CENTER);
 

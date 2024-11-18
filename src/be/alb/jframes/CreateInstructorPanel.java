@@ -8,6 +8,7 @@ import com.toedter.calendar.JCalendar;
 
 import javax.swing.*;
 import java.awt.*;
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -89,26 +90,28 @@ public class CreateInstructorPanel extends JPanel {
     }
 
     private void createInstructor() {
-        // Collect data from the form
-        String firstName = firstNameField.getText().trim();
-        String lastName = lastNameField.getText().trim();
-        String city = cityField.getText().trim();
-        String postalCode = postalCodeField.getText().trim();
-        String streetName = streetNameField.getText().trim();
-        String streetNumber = streetNumberField.getText().trim();
-        LocalDate dob = dobCalendar.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        try {
+            // Collect data from the form
+            String firstName = firstNameField.getText().trim();
+            String lastName = lastNameField.getText().trim();
+            String city = cityField.getText().trim();
+            String postalCode = postalCodeField.getText().trim();
+            String streetName = streetNameField.getText().trim();
+            String streetNumber = streetNumberField.getText().trim();
+            LocalDate dob = extractDateOnly(dobCalendar.getDate()); // Extract the date cleanly
 
-        List<String> result = Instructor.createInstructor(0, firstName, lastName, city, postalCode, streetName, streetNumber, dob);
+            // Business logic
+            List<String> result = Instructor.createInstructor(firstName, lastName, city, postalCode, streetName, streetNumber, dob);
 
-        // Check if everything went well or if there are errors
-        if (result.get(0).equals("1")) {
-            // Success
-            JOptionPane.showMessageDialog(this, "Instructor created successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-            goToManageInstructorPanel();
-        } else {
-            // Errors
-            result.remove(0); 
-            displayFieldErrors(result);
+            if (result.get(0).equals("1")) {
+                JOptionPane.showMessageDialog(this, "Instructor created successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                goToManageInstructorPanel();
+            } else {
+                result.remove(0);
+                displayFieldErrors(result);
+            }
+        } catch (IllegalArgumentException e) {
+            displayFieldErrors(List.of(e.getMessage()));
         }
     }
 
@@ -141,4 +144,12 @@ public class CreateInstructorPanel extends JPanel {
         errorPanel.revalidate();
         errorPanel.repaint();
     }
+    
+    private LocalDate extractDateOnly(java.util.Date date) {
+        if (date == null) {
+            throw new IllegalArgumentException("Please select a valid date.");
+        }
+        return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    }
+
 }
