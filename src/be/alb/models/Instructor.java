@@ -96,6 +96,10 @@ public class Instructor extends Person {
         if (!RegexValidator.isValidStreetName(streetName)) result.add("Nom de rue invalide.");
         if (!RegexValidator.isValidStreetNumber(streetNumber)) result.add("Numéro de rue invalide.");
         if (!RegexValidator.isValidDob(dob)) result.add("Date de naissance invalide. L'instructeur doit avoir au moins 18 ans.");
+        if (accreditationIds == null || accreditationIds.isEmpty()) {
+            result.add("L'instructeur doit avoir au moins une accréditation.");
+            return result;
+        }
 
         // if there are errors, return 0 
         if (!result.isEmpty()) {
