@@ -26,6 +26,7 @@ public class MainFrame extends JFrame {
         JButton createBookingButton = new JButton("Create Booking");
 
         manageInstructorButton.addActionListener(e -> openManageInstructorPage());
+        manageSkierButton.addActionListener(e -> openManageSkierPage());
         menuPanel.add(manageInstructorButton);
         menuPanel.add(manageSkierButton);
         menuPanel.add(createLessonButton);
@@ -44,6 +45,13 @@ public class MainFrame extends JFrame {
         mainPanel.add(manageInstructorsPanel, "manageInstructorsPanel");
         cardLayout.show(mainPanel, "manageInstructorsPanel");
     }
+    
+    private void openManageSkierPage() {
+        ManageSkiersPanel manageSkiersPanel = new ManageSkiersPanel(cardLayout, mainPanel);
+        mainPanel.add(manageSkiersPanel, "manageSkiersPanel");
+        cardLayout.show(mainPanel, "manageSkiersPanel");
+    }
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(MainFrame::new);
