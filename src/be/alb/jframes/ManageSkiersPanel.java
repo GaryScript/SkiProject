@@ -4,6 +4,8 @@ import be.alb.models.Skier;
 
 import javax.swing.*;
 import java.awt.*;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
 
 public class ManageSkiersPanel extends JPanel {
@@ -24,7 +26,7 @@ public class ManageSkiersPanel extends JPanel {
             return;
         }
 
-        String[] columnNames = {"ID", "Nom", "Prénom", "Ville"};
+        String[] columnNames = {"ID", "Nom", "Prénom", "Ville", "Catégorie"};
         Object[][] data = new Object[skiers.size()][columnNames.length];
 
         for (int i = 0; i < skiers.size(); i++) {
@@ -33,6 +35,7 @@ public class ManageSkiersPanel extends JPanel {
             data[i][1] = skier.getLastName();
             data[i][2] = skier.getFirstName();
             data[i][3] = skier.getCity();
+            data[i][4] = calculateCategory(skiers.get(i).getDob()); // Calculer la catégorie ici
         }
 
         JTable table = new JTable(data, columnNames);
@@ -56,4 +59,12 @@ public class ManageSkiersPanel extends JPanel {
 
         add(buttonPanel, BorderLayout.NORTH);
     }
+
+    // Méthode pour calculer la catégorie en fonction de l'âge
+    private String calculateCategory(LocalDate dob) {
+        int age = Period.between(dob, LocalDate.now()).getYears();
+        return age <= 12 ? "Enfant" : "Adulte";
+    }
+
 }
+

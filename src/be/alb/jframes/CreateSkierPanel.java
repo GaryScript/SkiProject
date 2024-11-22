@@ -4,9 +4,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.time.LocalDate;
+import java.time.Period;
+import java.util.List;
 import be.alb.models.Skier;
 import com.toedter.calendar.JDateChooser;
-import java.util.List;
 
 public class CreateSkierPanel extends JPanel {
 
@@ -34,7 +36,7 @@ public class CreateSkierPanel extends JPanel {
 
         // Form panel to input skier data
         JPanel formPanel = new JPanel();
-        formPanel.setLayout(new GridLayout(8, 2, 10, 10));  // 8 rows, 2 columns, 10px gap
+        formPanel.setLayout(new GridLayout(9, 2, 10, 10)); // 9 rows for additional category
 
         // First Name
         JLabel firstNameLabel = new JLabel("First Name:");
@@ -79,6 +81,7 @@ public class CreateSkierPanel extends JPanel {
         formPanel.add(dobLabel);
         formPanel.add(dobChooser);
 
+        // Add form panel to main layout
         add(formPanel, BorderLayout.CENTER);
 
         // Button to submit the form
@@ -86,15 +89,21 @@ public class CreateSkierPanel extends JPanel {
         submitButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                createSkier();
+                createSkier(cardLayout, mainPanel);
             }
         });
 
         add(submitButton, BorderLayout.SOUTH);
     }
 
+    // Method to calculate category based on age
+    private String calculateCategory(LocalDate dob) {
+        int age = Period.between(dob, LocalDate.now()).getYears();
+        return age <= 12 ? "Enfant" : "Adulte";
+    }
+
     // Method to create the skier
-    private void createSkier() {
+    private void createSkier(CardLayout cardLayout, JPanel mainPanel) {
         // Retrieve form data
         String firstName = firstNameField.getText();
         String lastName = lastNameField.getText();
@@ -105,15 +114,25 @@ public class CreateSkierPanel extends JPanel {
 
         // Get the date of birth from JCalendar
         java.util.Date dobDate = dobChooser.getDate();
-        java.time.LocalDate dob = dobDate != null ? java.time.LocalDate.ofInstant(dobDate.toInstant(), java.time.ZoneId.systemDefault()) : null;
+        if (dobDate == null) {
+            JOptionPane.showMessageDialog(this, "Please select a valid date of birth.");
+            return;
+        }
+        LocalDate dob = dobDate.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+
+        // Calculate category based on age
+        String category = calculateCategory(dob);
 
         // Call Skier model to create the skier
         List<String> result = Skier.createSkier(firstName, lastName, city, postalCode, streetName, streetNumber, dob);
 
-        // Display result
         if ("1".equals(result.get(0))) {
             JOptionPane.showMessageDialog(this, "Skier created successfully!");
+
+            // Redirect to ManageSkiersPanel
+            cardLayout.show(mainPanel, "manageSkiersPanel");
         } else {
+            // Display errors
             StringBuilder errorMessage = new StringBuilder("Error creating skier:\n");
             for (String error : result) {
                 errorMessage.append(error).append("\n");
