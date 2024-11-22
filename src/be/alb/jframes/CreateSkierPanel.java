@@ -137,7 +137,7 @@ public class CreateSkierPanel extends JPanel {
         String category = calculateCategory(dob);
 
         // Get the insurance status from the checkbox
-        int hasInsurance = insuranceCheckBox.isSelected() ? 1 : 0; // 1 for checked, 0 for unchecked
+        Boolean hasInsurance = insuranceCheckBox.isSelected() ? true : false; // 1 for checked, 0 for unchecked
 
         // Call Skier model to create the skier
         List<String> result = Skier.createSkier(firstName, lastName, city, postalCode, streetName, streetNumber, dob, hasInsurance);

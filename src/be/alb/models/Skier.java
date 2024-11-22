@@ -20,7 +20,15 @@ public class Skier extends Person {
         this.hasInsurance = hasInsurance;
     }
 
-    // Getter for bookings
+    public boolean getHasInsurance() {
+        return hasInsurance;
+    }
+
+    // Setter pour hasInsurance (si nécessaire)
+    public void setHasInsurance(boolean hasInsurance) {
+        this.hasInsurance = hasInsurance;
+    }
+    
     public List<Booking> getBookings() {
         return bookings;
     }
@@ -70,7 +78,7 @@ public class Skier extends Person {
         if (!RegexValidator.isValidPostalCode(postalCode)) result.add("Code postal invalide.");
         if (!RegexValidator.isValidStreetName(streetName)) result.add("Nom de rue invalide.");
         if (!RegexValidator.isValidStreetNumber(streetNumber)) result.add("Numéro de rue invalide.");
-        if (!RegexValidator.isValidDobSkier(dob)) result.add("Date de naissance invalide. Le skieur doit avoir au moins 18 ans.");
+        if (!RegexValidator.isValidDobSkier(dob)) result.add("Date de naissance invalide. Le skieur doit avoir au moins 4 ans.");
 
         // if there are errors, return 0 
         if (!result.isEmpty()) {
