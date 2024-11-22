@@ -20,6 +20,7 @@ public class CreateSkierPanel extends JPanel {
     private JTextField streetNameField;
     private JTextField streetNumberField;
     private JDateChooser dobChooser;
+    private JCheckBox insuranceCheckBox; // Add the checkbox for insurance
 
     public CreateSkierPanel(CardLayout cardLayout, JPanel mainPanel) {
         setLayout(new BorderLayout());
@@ -31,7 +32,7 @@ public class CreateSkierPanel extends JPanel {
 
         // Form panel to input skier data
         JPanel formPanel = new JPanel();
-        formPanel.setLayout(new GridLayout(9, 2, 10, 10)); // 9 rows for additional category
+        formPanel.setLayout(new GridLayout(10, 2, 10, 10)); // Update grid to 10 rows
 
         // First Name
         JLabel firstNameLabel = new JLabel("First Name:");
@@ -75,6 +76,12 @@ public class CreateSkierPanel extends JPanel {
         dobChooser.setDateFormatString("yyyy-MM-dd");
         formPanel.add(dobLabel);
         formPanel.add(dobChooser);
+
+        // Insurance Checkbox
+        JLabel insuranceLabel = new JLabel("Has Insurance:");
+        insuranceCheckBox = new JCheckBox("Yes");
+        formPanel.add(insuranceLabel);
+        formPanel.add(insuranceCheckBox); // Add the checkbox for insurance
 
         // Add form panel to main layout
         add(formPanel, BorderLayout.CENTER);
@@ -129,8 +136,11 @@ public class CreateSkierPanel extends JPanel {
         // Calculate category based on age
         String category = calculateCategory(dob);
 
+        // Get the insurance status from the checkbox
+        int hasInsurance = insuranceCheckBox.isSelected() ? 1 : 0; // 1 for checked, 0 for unchecked
+
         // Call Skier model to create the skier
-        List<String> result = Skier.createSkier(firstName, lastName, city, postalCode, streetName, streetNumber, dob);
+        List<String> result = Skier.createSkier(firstName, lastName, city, postalCode, streetName, streetNumber, dob, hasInsurance);
 
         if ("1".equals(result.get(0))) {
             JOptionPane.showMessageDialog(this, "Skier created successfully!");
