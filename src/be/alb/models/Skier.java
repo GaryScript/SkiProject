@@ -10,15 +10,25 @@ import be.alb.utils.RegexValidator;
 public class Skier extends Person {
 
     private List<Booking> bookings;
+    private Boolean hasInsurance;
 
     // Constructor
     public Skier(int id, String firstName, String lastName, String city, String postalCode,
-                 String streetName, String streetNumber, LocalDate dob) {
+                 String streetName, String streetNumber, LocalDate dob, Boolean hasInsurance) {
         super(id, firstName, lastName, city, postalCode, streetName, streetNumber, dob);
         this.bookings = new ArrayList<>();
+        this.hasInsurance = hasInsurance;
     }
 
-    // Getter for bookings
+    public boolean getHasInsurance() {
+        return hasInsurance;
+    }
+
+    // Setter pour hasInsurance (si nécessaire)
+    public void setHasInsurance(boolean hasInsurance) {
+        this.hasInsurance = hasInsurance;
+    }
+    
     public List<Booking> getBookings() {
         return bookings;
     }
@@ -57,9 +67,10 @@ public class Skier extends Person {
         return skiers;
     }
     
-    public static List<String> createSkier(String firstName, String lastName, String city, String postalCode, String streetName, String streetNumber, LocalDate dob) {
+    public static List<String> createSkier(String firstName, String lastName, String city, String postalCode, String streetName, String streetNumber, LocalDate dob, Boolean hasInsurance) {
         List<String> result = new ArrayList<>();
         SkierDAO skierDAO = new SkierDAO();
+
         // validations
         if (!RegexValidator.isValidName(firstName)) result.add("Prénom invalide.");
         if (!RegexValidator.isValidName(lastName)) result.add("Nom invalide.");
@@ -67,8 +78,7 @@ public class Skier extends Person {
         if (!RegexValidator.isValidPostalCode(postalCode)) result.add("Code postal invalide.");
         if (!RegexValidator.isValidStreetName(streetName)) result.add("Nom de rue invalide.");
         if (!RegexValidator.isValidStreetNumber(streetNumber)) result.add("Numéro de rue invalide.");
-        if (!RegexValidator.isValidDob(dob)) result.add("Date de naissance invalide. L'instructeur doit avoir au moins 18 ans.");
-        
+        if (!RegexValidator.isValidDobSkier(dob)) result.add("Date de naissance invalide. Le skieur doit avoir au moins 4 ans.");
 
         // if there are errors, return 0 
         if (!result.isEmpty()) {
@@ -76,18 +86,21 @@ public class Skier extends Person {
             return result;
         }
 
+        // La variable hasInsurance est déjà un Boolean, donc on n'a pas besoin de la convertir
+        Boolean skierHasInsurance = hasInsurance;
+
         // bdd add
-        Skier newSkier = new Skier(0, firstName, lastName, city, postalCode, streetName, streetNumber, dob);
+        Skier newSkier = new Skier(0, firstName, lastName, city, postalCode, streetName, streetNumber, dob, skierHasInsurance);
         int newSkierId = -1;
         try {
-        	newSkierId = skierDAO.createSkier(newSkier);
+            newSkierId = skierDAO.createSkier(newSkier);
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        
+
         if (newSkierId == -1) {
             result.add(0, "0");
-            result.add("Erreur de base de données. Impossible de créer l'instructeur.");
+            result.add("Erreur de base de données. Impossible de créer le skieur.");
             return result;
         }
 
@@ -95,4 +108,6 @@ public class Skier extends Person {
         result.add(0, "1");
         return result;
     }
+
+
 }

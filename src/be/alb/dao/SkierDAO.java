@@ -16,7 +16,7 @@ public class SkierDAO implements SkierDAOInterface {
 
     public List<Skier> getAllSkiers() throws SQLException {
         List<Skier> skiers = new ArrayList<>();
-        String query = "SELECT * FROM skiers";
+        String query = "SELECT * FROM Skiers"; 
 
         try (Statement stmt = connection.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {
@@ -28,7 +28,8 @@ public class SkierDAO implements SkierDAOInterface {
                     rs.getString("postalcode"),
                     rs.getString("streetname"),
                     rs.getString("streetnumber"),
-                    rs.getDate("dob").toLocalDate()
+                    rs.getDate("dob").toLocalDate(),
+                    rs.getInt("hasInsurance") == 1 // Conversion de int (1 ou 0) en boolean
                 );
                 skiers.add(skier);
             }
@@ -38,20 +39,21 @@ public class SkierDAO implements SkierDAOInterface {
     }
 
     public Skier getSkierById(int skierId) throws SQLException {
-        String query = "SELECT * FROM Skiers WHERE id = ?";
+        String query = "SELECT * FROM Skiers WHERE skierid = ?"; 
         try (PreparedStatement pstmt = connection.prepareStatement(query)) {
             pstmt.setInt(1, skierId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     return new Skier(
-                        rs.getInt("id"),
-                        rs.getString("first_name"),
-                        rs.getString("last_name"),
+                        rs.getInt("skierid"),
+                        rs.getString("firstname"),
+                        rs.getString("lastname"),
                         rs.getString("city"),
-                        rs.getString("postal_code"),
-                        rs.getString("street_name"),
-                        rs.getString("street_number"),
-                        rs.getDate("dob").toLocalDate()
+                        rs.getString("postalcode"),
+                        rs.getString("streetname"),
+                        rs.getString("streetnumber"),
+                        rs.getDate("dob").toLocalDate(),
+                        rs.getInt("hasInsurance") == 1 // Conversion de int (1 ou 0) en boolean
                     );
                 }
             }
@@ -61,8 +63,8 @@ public class SkierDAO implements SkierDAOInterface {
     }
 
     public int createSkier(Skier skier) throws SQLException {
-        String insertQuery = "INSERT INTO Skiers (skierid, firstname, lastname, city, postalcode, streetname, streetnumber, dob) " +
-                             "VALUES (skier_id_seq.NEXTVAL, ?, ?, ?, ?, ?, ?, ?)";
+        String insertQuery = "INSERT INTO Skiers (skierid, firstname, lastname, city, postalcode, streetname, streetnumber, dob, hasInsurance) " +
+                             "VALUES (skier_id_seq.NEXTVAL, ?, ?, ?, ?, ?, ?, ?, ?)"; 
         String selectQuery = "SELECT skier_id_seq.CURRVAL FROM DUAL";
 
         try (PreparedStatement pstmt = connection.prepareStatement(insertQuery)) {
@@ -73,6 +75,7 @@ public class SkierDAO implements SkierDAOInterface {
             pstmt.setString(5, skier.getStreetName());
             pstmt.setString(6, skier.getStreetNumber());
             pstmt.setDate(7, Date.valueOf(skier.getDob()));
+            pstmt.setInt(8, skier.getHasInsurance() ? 1 : 0); // Conversion de boolean en int (1 ou 0)
 
             int affectedRows = pstmt.executeUpdate();
             if (affectedRows == 0) {
@@ -90,9 +93,8 @@ public class SkierDAO implements SkierDAOInterface {
         }
     }
 
-
     public boolean updateSkier(Skier skier) throws SQLException {
-        String query = "UPDATE Skiers SET first_name = ?, last_name = ?, city = ?, postal_code = ?, street_name = ?, street_number = ?, dob = ? WHERE id = ?";
+        String query = "UPDATE Skiers SET firstname = ?, lastname = ?, city = ?, postalcode = ?, streetname = ?, streetnumber = ?, dob = ?, hasInsurance = ? WHERE skierid = ?"; 
         try (PreparedStatement pstmt = connection.prepareStatement(query)) {
             pstmt.setString(1, skier.getFirstName());
             pstmt.setString(2, skier.getLastName());
@@ -101,7 +103,8 @@ public class SkierDAO implements SkierDAOInterface {
             pstmt.setString(5, skier.getStreetName());
             pstmt.setString(6, skier.getStreetNumber());
             pstmt.setDate(7, Date.valueOf(skier.getDob()));
-            pstmt.setInt(8, skier.getId());
+            pstmt.setInt(8, skier.getHasInsurance() ? 1 : 0); // Conversion de boolean en int (1 ou 0)
+            pstmt.setInt(9, skier.getId());
 
             int affectedRows = pstmt.executeUpdate();
             return affectedRows > 0; 
@@ -109,7 +112,7 @@ public class SkierDAO implements SkierDAOInterface {
     }
 
     public boolean deleteSkier(int skierId) throws SQLException {
-        String query = "DELETE FROM Skiers WHERE id = ?";
+        String query = "DELETE FROM Skiers WHERE skierid = ?"; 
         try (PreparedStatement pstmt = connection.prepareStatement(query)) {
             pstmt.setInt(1, skierId);
             int affectedRows = pstmt.executeUpdate();

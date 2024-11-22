@@ -53,4 +53,13 @@ public class RegexValidator {
         
         return dob.isBefore(today) && Period.between(dob, today).getYears() >= 18;
     }
+    
+    public static boolean isValidDobSkier(LocalDate dob) {
+        if (dob == null) {
+            return false;
+        }
+        LocalDate today = LocalDate.now();
+        
+        return dob.isBefore(today) && Period.between(dob, today).getYears() >= 4;
+    }
 }
