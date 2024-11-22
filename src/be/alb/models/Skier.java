@@ -57,9 +57,10 @@ public class Skier extends Person {
         return skiers;
     }
     
-    public static List<String> createSkier(String firstName, String lastName, String city, String postalCode, String streetName, String streetNumber, LocalDate dob) {
+    public static List<String> createSkier(String firstName, String lastName, String city, String postalCode, String streetName, String streetNumber, LocalDate dob, int hasInsurance) {
         List<String> result = new ArrayList<>();
         SkierDAO skierDAO = new SkierDAO();
+
         // validations
         if (!RegexValidator.isValidName(firstName)) result.add("Prénom invalide.");
         if (!RegexValidator.isValidName(lastName)) result.add("Nom invalide.");
@@ -67,8 +68,7 @@ public class Skier extends Person {
         if (!RegexValidator.isValidPostalCode(postalCode)) result.add("Code postal invalide.");
         if (!RegexValidator.isValidStreetName(streetName)) result.add("Nom de rue invalide.");
         if (!RegexValidator.isValidStreetNumber(streetNumber)) result.add("Numéro de rue invalide.");
-        if (!RegexValidator.isValidDob(dob)) result.add("Date de naissance invalide. L'instructeur doit avoir au moins 18 ans.");
-        
+        if (!RegexValidator.isValidDobSkier(dob)) result.add("Date de naissance invalide. L'instructeur doit avoir au moins 18 ans.");
 
         // if there are errors, return 0 
         if (!result.isEmpty()) {
@@ -77,14 +77,14 @@ public class Skier extends Person {
         }
 
         // bdd add
-        Skier newSkier = new Skier(0, firstName, lastName, city, postalCode, streetName, streetNumber, dob);
+        Skier newSkier = new Skier(0, firstName, lastName, city, postalCode, streetName, streetNumber, dob, hasInsurance);
         int newSkierId = -1;
         try {
-        	newSkierId = skierDAO.createSkier(newSkier);
+            newSkierId = skierDAO.createSkier(newSkier);
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        
+
         if (newSkierId == -1) {
             result.add(0, "0");
             result.add("Erreur de base de données. Impossible de créer l'instructeur.");
@@ -95,4 +95,5 @@ public class Skier extends Person {
         result.add(0, "1");
         return result;
     }
+
 }
