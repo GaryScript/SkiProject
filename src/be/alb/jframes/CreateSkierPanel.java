@@ -29,11 +29,6 @@ public class CreateSkierPanel extends JPanel {
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         add(titleLabel, BorderLayout.NORTH);
 
-        // Back button to return to the main menu
-        JButton backButton = new JButton("Back to Menu");
-        backButton.addActionListener(e -> cardLayout.show(mainPanel, "menuPanel"));
-        add(backButton, BorderLayout.SOUTH);
-
         // Form panel to input skier data
         JPanel formPanel = new JPanel();
         formPanel.setLayout(new GridLayout(9, 2, 10, 10)); // 9 rows for additional category
@@ -94,6 +89,17 @@ public class CreateSkierPanel extends JPanel {
         });
 
         add(submitButton, BorderLayout.SOUTH);
+
+        // Add a "Back to Manage Skiers" button
+        JButton backButton = new JButton("Back to Manage Skiers");
+        backButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Return to ManageSkiersPanel
+                cardLayout.show(mainPanel, "manageSkiersPanel");
+            }
+        });
+        add(backButton, BorderLayout.NORTH);
     }
 
     // Method to calculate category based on age
