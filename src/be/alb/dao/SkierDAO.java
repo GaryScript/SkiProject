@@ -61,8 +61,11 @@ public class SkierDAO implements SkierDAOInterface {
     }
 
     public int createSkier(Skier skier) throws SQLException {
-        String query = "INSERT INTO Skiers (skierid, firstname, lastname, city, postalcode, streetname, streetnumber, dob) VALUES (skier_id_seq.NEXTVAL, ?, ?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement pstmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+        String insertQuery = "INSERT INTO Skiers (skierid, firstname, lastname, city, postalcode, streetname, streetnumber, dob) " +
+                             "VALUES (skier_id_seq.NEXTVAL, ?, ?, ?, ?, ?, ?, ?)";
+        String selectQuery = "SELECT skier_id_seq.CURRVAL FROM DUAL";
+
+        try (PreparedStatement pstmt = connection.prepareStatement(insertQuery)) {
             pstmt.setString(1, skier.getFirstName());
             pstmt.setString(2, skier.getLastName());
             pstmt.setString(3, skier.getCity());
@@ -73,19 +76,20 @@ public class SkierDAO implements SkierDAOInterface {
 
             int affectedRows = pstmt.executeUpdate();
             if (affectedRows == 0) {
-                throw new SQLException("Creating skiers failed, no rows affected.");
+                throw new SQLException("Creating skier failed, no rows affected.");
             }
+        }
 
-            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    return generatedKeys.getInt(1); // Retourne l'ID généré
-                }
-                else {
-                    throw new SQLException("Creating skier failed, no ID obtained.");
-                }
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(selectQuery)) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            } else {
+                throw new SQLException("Failed to retrieve skier ID after insertion.");
             }
         }
     }
+
 
     public boolean updateSkier(Skier skier) throws SQLException {
         String query = "UPDATE Skiers SET first_name = ?, last_name = ?, city = ?, postal_code = ?, street_name = ?, street_number = ?, dob = ? WHERE id = ?";
