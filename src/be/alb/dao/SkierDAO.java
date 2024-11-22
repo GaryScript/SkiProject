@@ -61,7 +61,7 @@ public class SkierDAO implements SkierDAOInterface {
     }
 
     public int createSkier(Skier skier) throws SQLException {
-        String query = "INSERT INTO Skiers (skierid, firstname, lastname, city, postalcode, streetname, street_number, dob) VALUES (skier_id_seq.NEXTVAL, ?, ?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO Skiers (skierid, firstname, lastname, city, postalcode, streetname, streetnumber, dob) VALUES (skier_id_seq.NEXTVAL, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pstmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, skier.getFirstName());
             pstmt.setString(2, skier.getLastName());
