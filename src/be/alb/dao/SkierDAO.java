@@ -15,18 +15,18 @@ public class SkierDAO implements SkierDAOInterface {
 
     public List<Skier> getAllSkiers() throws SQLException {
         List<Skier> skiers = new ArrayList<>();
-        String query = "SELECT * FROM Skiers";
+        String query = "SELECT * FROM skiers";
 
         try (Statement stmt = connection.createStatement(); ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {
                 Skier skier = new Skier(
-                    rs.getInt("id"),
-                    rs.getString("first_name"),
-                    rs.getString("last_name"),
+                    rs.getInt("skierid"),
+                    rs.getString("lastname"),
+                    rs.getString("firstname"),
                     rs.getString("city"),
-                    rs.getString("postal_code"),
-                    rs.getString("street_name"),
-                    rs.getString("street_number"),
+                    rs.getString("postalcode"),
+                    rs.getString("streetname"),
+                    rs.getString("streetnumber"),
                     rs.getDate("dob").toLocalDate()
                 );
                 skiers.add(skier);
