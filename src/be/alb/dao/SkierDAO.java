@@ -1,5 +1,6 @@
 package be.alb.dao;
 
+import be.alb.database.OracleDBConnection;
 import be.alb.models.Skier;
 import java.sql.*;
 import java.util.ArrayList;
@@ -9,8 +10,8 @@ public class SkierDAO implements SkierDAOInterface {
 
     private Connection connection;
 
-    public SkierDAO(Connection connection) {
-        this.connection = connection;
+    public SkierDAO() {
+        this.connection = OracleDBConnection.getInstance();
     }
 
     public List<Skier> getAllSkiers() throws SQLException {

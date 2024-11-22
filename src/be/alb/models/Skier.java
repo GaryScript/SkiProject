@@ -44,6 +44,8 @@ public class Skier extends Person {
     
     public static List<Skier> getAllSkiers() {
         List<Skier> skiers = null;
+        
+        SkierDAO skierDAO = new SkierDAO();
 
         try {
             skiers = skierDAO.getAllSkiers();
