@@ -51,17 +51,17 @@ public class Booking {
         this.instructor = instructor;
     }
     
-    public static List<Skier> getAllBookings() {
-        List<Skier> skiers = null;
-
-        try {
-            skiers = BookingDAO.getAllSkiers();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return skiers;
-    }
+//    public static List<Skier> getAllBookings() {
+//        List<Skier> skiers = null;
+//
+//        try {
+//            skiers = BookingDAO.getAllSkiers();
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//
+//        return skiers;
+//    }
 
     @Override
     public boolean equals(Object obj) {
