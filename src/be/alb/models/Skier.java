@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import be.alb.dao.*;
+import be.alb.utils.RegexValidator;
 
 public class Skier extends Person {
 
@@ -54,5 +55,44 @@ public class Skier extends Person {
         }
 
         return skiers;
+    }
+    
+    public static List<String> createSkier(String firstName, String lastName, String city, String postalCode, String streetName, String streetNumber, LocalDate dob) {
+        List<String> result = new ArrayList<>();
+        SkierDAO skierDAO = new SkierDAO();
+        // validations
+        if (!RegexValidator.isValidName(firstName)) result.add("Prénom invalide.");
+        if (!RegexValidator.isValidName(lastName)) result.add("Nom invalide.");
+        if (!RegexValidator.isValidCity(city)) result.add("Ville invalide.");
+        if (!RegexValidator.isValidPostalCode(postalCode)) result.add("Code postal invalide.");
+        if (!RegexValidator.isValidStreetName(streetName)) result.add("Nom de rue invalide.");
+        if (!RegexValidator.isValidStreetNumber(streetNumber)) result.add("Numéro de rue invalide.");
+        if (!RegexValidator.isValidDob(dob)) result.add("Date de naissance invalide. L'instructeur doit avoir au moins 18 ans.");
+        
+
+        // if there are errors, return 0 
+        if (!result.isEmpty()) {
+            result.add(0, "0");
+            return result;
+        }
+
+        // bdd add
+        Skier newSkier = new Skier(0, firstName, lastName, city, postalCode, streetName, streetNumber, dob);
+        int newSkierId = -1;
+        try {
+        	newSkierId = skierDAO.createSkier(newSkier);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        if (newSkierId == -1) {
+            result.add(0, "0");
+            result.add("Erreur de base de données. Impossible de créer l'instructeur.");
+            return result;
+        }
+
+        // everything went fine
+        result.add(0, "1");
+        return result;
     }
 }
