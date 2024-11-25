@@ -19,14 +19,17 @@ public class MainFrame extends JFrame {
         mainPanel = new JPanel(cardLayout);
 
         // main page with main buttons
-        JPanel menuPanel = new JPanel(new GridLayout(4, 1));
+        JPanel menuPanel = new JPanel(new GridLayout(5, 1));  // Augmenté à 5 lignes
         JButton manageInstructorButton = new JButton("Manage Instructor");
         JButton manageSkierButton = new JButton("Manage Skier");
-        JButton createLessonButton = new JButton("Create Lesson");
+        JButton createLessonButton = new JButton("Manage Lessons");  // Changer le texte pour gérer les leçons
         JButton createBookingButton = new JButton("Create Booking");
 
         manageInstructorButton.addActionListener(e -> openManageInstructorPage());
         manageSkierButton.addActionListener(e -> openManageSkierPage());
+        createLessonButton.addActionListener(e -> openManageLessonsPage());  // Redirige vers ManageLessonsPanel
+        createBookingButton.addActionListener(e -> openCreateBookingPage());
+
         menuPanel.add(manageInstructorButton);
         menuPanel.add(manageSkierButton);
         menuPanel.add(createLessonButton);
@@ -52,6 +55,15 @@ public class MainFrame extends JFrame {
         cardLayout.show(mainPanel, "manageSkiersPanel");
     }
 
+    private void openManageLessonsPage() {
+        ManageLessonsPanel manageLessonsPanel = new ManageLessonsPanel(cardLayout, mainPanel);
+        mainPanel.add(manageLessonsPanel, "manageLessonsPanel");
+        cardLayout.show(mainPanel, "manageLessonsPanel");
+    }
+
+    private void openCreateBookingPage() {
+        // Ajouter la logique pour gérer les réservations si nécessaire
+    }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(MainFrame::new);
