@@ -26,6 +26,12 @@ public class Instructor extends Person {
         this.lessons = new ArrayList<>();
     }
     
+    public Instructor(int id, String firstName, String lastName, String city, String postalCode, String streetName, String streetNumber, LocalDate dob,
+    		List<Accreditation> accreditations) {
+        super(id, firstName, lastName, city, postalCode, streetName, streetNumber, dob);
+        this.accreditations = accreditations;
+    }
+    
 
     public void addLesson(Lesson lesson) {
         if (lesson == null) {
