@@ -1,5 +1,10 @@
 package be.alb.models;
 
+import java.sql.SQLException;
+import java.util.List;
+
+import be.alb.dao.LessonTypeDAO;
+
 public class LessonType {
     private int lessonTypeId;
     private String name;
@@ -70,5 +75,15 @@ public class LessonType {
     // Méthode pour récupérer l'ID de l'accréditation via l'objet Accreditation
     public int getAccreditationId() {
         return accreditation != null ? accreditation.getAccreditationID() : 0;
+    }
+    
+    public static List<LessonType> getAllLessonTypes() {
+        LessonTypeDAO lessonTypeDAO = new LessonTypeDAO();
+        try {
+            return lessonTypeDAO.getAllLessonTypes(); // Appel à la méthode du DAO
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
