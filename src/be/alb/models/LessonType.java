@@ -6,15 +6,16 @@ public class LessonType {
     private String ageGroup;
     private String sportType;
     private double price;
-    private int accreditationId;
+    private Accreditation accreditation; // Référence à l'objet Accreditation
 
-    public LessonType(int lessonTypeId, String name, String ageGroup, String sportType, double price, int accreditationId) {
+    // Constructeur
+    public LessonType(int lessonTypeId, String name, String ageGroup, String sportType, double price, Accreditation accreditation) {
         this.lessonTypeId = lessonTypeId;
         this.name = name;
         this.ageGroup = ageGroup;
         this.sportType = sportType;
         this.price = price;
-        this.accreditationId = accreditationId;
+        this.accreditation = accreditation;
     }
 
     // Getters et Setters
@@ -58,11 +59,16 @@ public class LessonType {
         this.price = price;
     }
 
-    public int getAccreditationId() {
-        return accreditationId;
+    public Accreditation getAccreditation() {
+        return accreditation;
     }
 
-    public void setAccreditationId(int accreditationId) {
-        this.accreditationId = accreditationId;
+    public void setAccreditation(Accreditation accreditation) {
+        this.accreditation = accreditation;
+    }
+
+    // Méthode pour récupérer l'ID de l'accréditation via l'objet Accreditation
+    public int getAccreditationId() {
+        return accreditation != null ? accreditation.getAccreditationID() : 0;
     }
 }
