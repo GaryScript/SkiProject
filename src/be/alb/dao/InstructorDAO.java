@@ -147,17 +147,14 @@ public class InstructorDAO {
 	                 "LEFT JOIN LESSONS l ON i.INSTRUCTORID = l.INSTRUCTORID " +
 	                 "WHERE lt.LESSONTYPEID = ? " +
 	                 "AND (l.STARTDATE IS NULL " +
-	                 "     OR (l.STARTDATE NOT BETWEEN ? AND ? " +
-	                 "         AND l.ENDDATE NOT BETWEEN ? AND ?)) " +
+	                 "     OR NOT (l.STARTDATE <= ? AND l.ENDDATE >= ?)) " +
 	                 "AND a.ACCREDITATIONID = lt.ACCREDITATIONID " +
 	                 "ORDER BY i.LASTNAME, i.FIRSTNAME";
 
 	    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
 	        stmt.setInt(1, lessonTypeId);
-	        stmt.setDate(2, new java.sql.Date(startDate.getTime()));
-	        stmt.setDate(3, new java.sql.Date(endDate.getTime()));
-	        stmt.setDate(4, new java.sql.Date(startDate.getTime()));
-	        stmt.setDate(5, new java.sql.Date(endDate.getTime()));
+	        stmt.setDate(2, new java.sql.Date(endDate.getTime())); // Date de fin de la plage
+	        stmt.setDate(3, new java.sql.Date(startDate.getTime())); // Date de début de la plage
 
 	        try (ResultSet rs = stmt.executeQuery()) {
 	            Map<Integer, Instructor> instructorMap = new HashMap<>();
@@ -194,10 +191,5 @@ public class InstructorDAO {
 	    }
 
 	    return availableInstructors;
-	}
-
-
-
-	
-	
+	}	
 }

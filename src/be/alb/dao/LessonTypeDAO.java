@@ -17,7 +17,7 @@ public class LessonTypeDAO {
 	    
 	    String sql = "SELECT lt.LESSONTYPEID, lt.NAME, lt.AGEGROUP, lt.SPORTTYPE, lt.PRICE, a.ACCREDITATIONID, a.NAME as accreditation_name " +
 	                 "FROM LessonType lt " +
-	                 "JOIN Accreditation a ON lt.ACCREDITATIONID = a.ACCREDITATIONID";
+	                 "JOIN Accreditations a ON lt.ACCREDITATIONID = a.ACCREDITATIONID";
 	    
 	    try (PreparedStatement stmt = connection.prepareStatement(sql);
 	         ResultSet rs = stmt.executeQuery()) {
