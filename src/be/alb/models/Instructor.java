@@ -1,5 +1,7 @@
 package be.alb.models;
 
+import java.sql.Date;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -126,6 +128,15 @@ public class Instructor extends Person {
         // everything went fine
         result.add(0, "1");
         return result;
+    }
+    
+    public List<Instructor> getAvailableInstructors(Date startDate, Date endDate, int lessonTypeId)
+    {
+    	List<Instructor> instructors = new ArrayList<>();
+    	InstructorDAO instructorDAO = new InstructorDAO();
+    	instructors = instructorDAO.getAvailableInstructors(startDate, endDate, lessonTypeId);
+    	
+    	return instructors;
     }
 
 }
