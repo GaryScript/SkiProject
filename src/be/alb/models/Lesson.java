@@ -96,6 +96,7 @@ public class Lesson {
     // Static method to handle lesson creation
     public static boolean createLesson(Date startDate, Date endDate, Instructor instructor, LessonType lessonType, boolean isPrivate) {
         if (isPrivate) {
+        	startDate = new Date(startDate.getTime() + 12 * 60 * 60 * 1000); // 12:00
             Lesson privateLesson = new Lesson(0, startDate, endDate, instructor, lessonType, true);
             return LessonDAO.createLesson(privateLesson);
         } else {

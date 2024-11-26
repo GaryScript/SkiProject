@@ -26,8 +26,7 @@ public enum LessonTypeEnum {
     // Map the lesson type name to the corresponding enum value
     public static LessonTypeEnum fromLessonTypeName(String lessonTypeName) {
         switch (lessonTypeName) {
-            case "Ski de Fond":
-            case "Télémark":
+            case "Télémark 1-4":
             case "Ski Adulte Niveau 1-4":
             case "Ski Adulte Hors-piste":
                 return ADULT;
