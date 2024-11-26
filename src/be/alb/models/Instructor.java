@@ -130,12 +130,12 @@ public class Instructor extends Person {
         return result;
     }
     
-    public static List<Instructor> getAvailableInstructors(Date startDate, Date endDate, int lessonTypeId)
+    public static List<Instructor> getAvailableInstructors(Date startDate, Date endDate, int lessonTypeId, boolean isPrivate)
     {
     	
     	List<Instructor> instructors = new ArrayList<>();
     	InstructorDAO instructorDAO = new InstructorDAO();
-    	instructors = instructorDAO.getAvailableInstructors(startDate, endDate, lessonTypeId);
+    	instructors = instructorDAO.getAvailableInstructors(startDate, endDate, lessonTypeId, isPrivate);
     	
     	return instructors;
     }   

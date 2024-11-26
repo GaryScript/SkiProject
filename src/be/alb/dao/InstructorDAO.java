@@ -134,10 +134,11 @@ public class InstructorDAO {
         }
     }
 	
-	public List<Instructor> getAvailableInstructors(Date startDate, Date endDate, int lessonTypeId) {
+	public List<Instructor> getAvailableInstructors(Date startDate, Date endDate, int lessonTypeId, boolean isPrivateLesson) {
 	    List<Instructor> availableInstructors = new ArrayList<>();
 	    Connection connection = OracleDBConnection.getInstance();
 
+	    // Définir la requête SQL de base
 	    String sql = "SELECT DISTINCT i.INSTRUCTORID, i.FIRSTNAME, i.LASTNAME, i.CITY, i.POSTALCODE, i.STREETNAME, i.STREETNUMBER, i.DOB, " +
 	                 "a.ACCREDITATIONID, a.NAME AS ACCREDITATION_NAME " +
 	                 "FROM INSTRUCTORS i " +
@@ -146,15 +147,30 @@ public class InstructorDAO {
 	                 "JOIN LESSONTYPE lt ON a.ACCREDITATIONID = lt.ACCREDITATIONID " +
 	                 "LEFT JOIN LESSONS l ON i.INSTRUCTORID = l.INSTRUCTORID " +
 	                 "WHERE lt.LESSONTYPEID = ? " +
-	                 "AND (l.STARTDATE IS NULL " +
-	                 "     OR NOT (l.STARTDATE <= ? AND l.ENDDATE >= ?)) " +
-	                 "AND a.ACCREDITATIONID = lt.ACCREDITATIONID " +
-	                 "ORDER BY i.LASTNAME, i.FIRSTNAME";
+	                 "AND a.ACCREDITATIONID = lt.ACCREDITATIONID ";
+
+	    // Si c'est une leçon privée, on vérifie une seule date (startDate)
+	    if (isPrivateLesson) {
+	        sql += "AND (l.STARTDATE IS NULL OR l.STARTDATE != ?) ";  // Vérifier que l'instructeur n'est pas déjà occupé à cette date
+	    } else {
+	        // Pour les leçons collectives, vérifier le chevauchement des dates
+	        sql += "AND (l.STARTDATE IS NULL " +
+	               "     OR NOT (l.STARTDATE <= ? AND l.ENDDATE >= ?)) ";
+	    }
+
+	    sql += "ORDER BY i.LASTNAME, i.FIRSTNAME";
 
 	    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
 	        stmt.setInt(1, lessonTypeId);
-	        stmt.setDate(2, new java.sql.Date(endDate.getTime())); // Date de fin de la plage
-	        stmt.setDate(3, new java.sql.Date(startDate.getTime())); // Date de début de la plage
+
+	        // Si c'est une leçon privée, utiliser la seule date de début
+	        if (isPrivateLesson) {
+	            stmt.setDate(2, new java.sql.Date(startDate.getTime())); // Vérifier la disponibilité à la date donnée
+	        } else {
+	            // Si c'est une leçon collective, utiliser les dates de début et de fin
+	            stmt.setDate(2, new java.sql.Date(endDate.getTime())); // Date de fin de la plage
+	            stmt.setDate(3, new java.sql.Date(startDate.getTime())); // Date de début de la plage
+	        }
 
 	        try (ResultSet rs = stmt.executeQuery()) {
 	            Map<Integer, Instructor> instructorMap = new HashMap<>();
@@ -191,5 +207,6 @@ public class InstructorDAO {
 	    }
 
 	    return availableInstructors;
-	}	
+	}
+
 }
