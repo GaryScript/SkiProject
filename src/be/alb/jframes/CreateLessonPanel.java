@@ -6,7 +6,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import be.alb.models.LessonType;
-import be.alb.enums.LessonTypeEnum;
 import be.alb.models.Instructor;
 import be.alb.models.Lesson;
 
@@ -15,8 +14,8 @@ public class CreateLessonPanel extends JPanel {
     private JComboBox<String> durationComboBox;
     private JSpinner dateSpinner;
     private JList<String> instructorList;
-    private List<Instructor> availableInstructors; // Passée comme paramètre à submitLesson
-    private List<LessonType> allLessonTypes; // Passée comme paramètre à submitLesson
+    private List<Instructor> availableInstructors;
+    private List<LessonType> allLessonTypes;
 
     public CreateLessonPanel(CardLayout cardLayout, JPanel mainPanel) {
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -59,23 +58,30 @@ public class CreateLessonPanel extends JPanel {
         JScrollPane instructorScrollPane = new JScrollPane(instructorList);
         add(instructorScrollPane);
 
-        
         // Submit Button
         JButton submitButton = new JButton("Submit");
-        submitButton.addActionListener(e -> submitLesson(availableInstructors, allLessonTypes));
+        submitButton.addActionListener(e -> submitLesson(availableInstructors, allLessonTypes, cardLayout, mainPanel));
         add(submitButton);
        
         JButton loadInstructorsButton = new JButton("Load Available Instructors");
         loadInstructorsButton.addActionListener(e -> loadInstructors());
         add(loadInstructorsButton);
+
+        // Back Button
+        JButton backButton = new JButton("Back to Manage Lessons");
+        backButton.addActionListener(e -> {
+            // Switch to ManageLessonsPanel when clicked
+            cardLayout.show(mainPanel, "manageLessonsPanel");
+        });
+        add(backButton);
+        
+  
     }
     
     private void loadLessonTypes() {
         try {
-            // Dynamically load lesson types from the model
             allLessonTypes = LessonType.getAllLessonTypes();
 
-            // Populate the combo box with lesson type names
             lessonTypeComboBox.removeAllItems();
             for (LessonType lessonType : allLessonTypes) {
                 lessonTypeComboBox.addItem(lessonType.getName());
@@ -91,14 +97,12 @@ public class CreateLessonPanel extends JPanel {
     
     private void loadInstructors() {
         try {
-            // Get the selected lesson type and date
             String selectedLessonTypeName = (String) lessonTypeComboBox.getSelectedItem();
             if (selectedLessonTypeName == null) {
                 JOptionPane.showMessageDialog(this, "Please select a lesson type.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            // Retrieve lesson type ID based on name
             LessonType lessonType = LessonType.getAllLessonTypes().stream()
                 .filter(lt -> lt.getName().equals(selectedLessonTypeName))
                 .findFirst().orElse(null);
@@ -108,20 +112,14 @@ public class CreateLessonPanel extends JPanel {
                 return;
             }
 
-         // Get the date from the spinner
             Date selectedDate = new Date(((java.util.Date) dateSpinner.getValue()).getTime());
-            // Assuming a duration of 2 hours for simplicity (can be dynamic based on other fields)
-            Date endDate = new Date(selectedDate.getTime() + (2L * 60 * 60 * 1000)); // Add 2 hours
+            Date endDate = new Date(selectedDate.getTime() + (2L * 60 * 60 * 1000));
 
-            // Convert java.util.Date to java.sql.Date
             java.sql.Date sqlStartDate = new java.sql.Date(selectedDate.getTime());
             java.sql.Date sqlEndDate = new java.sql.Date(endDate.getTime());
 
-            // Fetch available instructors based on the selected date and lesson type
             availableInstructors = Instructor.getAvailableInstructors(sqlStartDate, sqlEndDate, lessonType.getLessonTypeId());
 
-
-            // Populate instructor list
             DefaultListModel<String> model = new DefaultListModel<>();
             for (Instructor instructor : availableInstructors) {
                 model.addElement(instructor.getFirstName() + " " + instructor.getLastName());
@@ -136,13 +134,12 @@ public class CreateLessonPanel extends JPanel {
         }
     }
 
-    private void submitLesson(List<Instructor> availableInstructors, List<LessonType> lessonTypes) {
-    	if (lessonTypes == null) {
-    	    JOptionPane.showMessageDialog(this, "Lesson types are not loaded correctly.", "Error", JOptionPane.ERROR_MESSAGE);
-    	    return;
-    	  }
-    	
-    	// Collect and validate input data
+    private void submitLesson(List<Instructor> availableInstructors, List<LessonType> lessonTypes, CardLayout cardLayout, JPanel mainPanel) {
+        if (lessonTypes == null) {
+            JOptionPane.showMessageDialog(this, "Lesson types are not loaded correctly.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
         String selectedLessonTypeName = (String) lessonTypeComboBox.getSelectedItem();
         Date selectedDate = (Date) dateSpinner.getValue();
         String selectedInstructorName = instructorList.getSelectedValue();
@@ -153,7 +150,6 @@ public class CreateLessonPanel extends JPanel {
             return;
         }
 
-        // Find LessonType object
         LessonType lessonType = lessonTypes.stream()
             .filter(lt -> lt.getName().equals(selectedLessonTypeName))
             .findFirst()
@@ -163,7 +159,6 @@ public class CreateLessonPanel extends JPanel {
             return;
         }
 
-        // Find Instructor object
         Instructor selectedInstructor = availableInstructors.stream()
             .filter(i -> (i.getFirstName() + " " + i.getLastName()).equals(selectedInstructorName))
             .findFirst()
@@ -173,15 +168,8 @@ public class CreateLessonPanel extends JPanel {
             return;
         }
 
-        // Calculate startDate and endDate
         java.sql.Date startDate = new java.sql.Date(selectedDate.getTime());
-        java.sql.Date endDate;
-
-        if (selectedDuration.contains("Group")) {
-            endDate = new java.sql.Date(selectedDate.getTime() + 3 * 24 * 60 * 60 * 1000L); // Add 3 days
-        } else {
-            endDate = calculatePrivateLessonEndDate(selectedDate, selectedDuration);
-        }
+        java.sql.Date endDate = calculatePrivateLessonEndDate(selectedDate, selectedDuration);
 
         boolean success = Lesson.createLesson(
             startDate,
@@ -193,11 +181,12 @@ public class CreateLessonPanel extends JPanel {
 
         if (success) {
             JOptionPane.showMessageDialog(this, "Lesson created successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            // After lesson creation, navigate to ManageLessonsPanel
+            cardLayout.show(mainPanel, "manageLessonsPanel");
         } else {
             JOptionPane.showMessageDialog(this, "Failed to create lesson.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-
 
     private java.sql.Date calculatePrivateLessonEndDate(Date startDate, String selectedDuration) {
         Calendar calendar = Calendar.getInstance();
@@ -207,14 +196,11 @@ public class CreateLessonPanel extends JPanel {
         calendar.set(Calendar.SECOND, 0);
 
         if (selectedDuration.contains("1 Hour")) {
-            calendar.add(Calendar.HOUR, 1); // End at 13h
+            calendar.add(Calendar.HOUR, 1);
         } else if (selectedDuration.contains("2 Hours")) {
-            calendar.add(Calendar.HOUR, 2); // End at 14h
+            calendar.add(Calendar.HOUR, 2);
         }
 
         return new java.sql.Date(calendar.getTimeInMillis());
     }
-    
- 
-
-}  
+}
