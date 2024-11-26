@@ -6,6 +6,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import be.alb.models.LessonType;
+import be.alb.utils.TimeAdjuster;
+import be.alb.enums.LessonPeriod;
 import be.alb.models.Instructor;
 import be.alb.models.Lesson;
 
@@ -96,43 +98,70 @@ public class CreateLessonPanel extends JPanel {
     }
     
     private void loadInstructors() {
-        try {
-            String selectedLessonTypeName = (String) lessonTypeComboBox.getSelectedItem();
-            if (selectedLessonTypeName == null) {
-                JOptionPane.showMessageDialog(this, "Please select a lesson type.", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            LessonType lessonType = LessonType.getAllLessonTypes().stream()
-                .filter(lt -> lt.getName().equals(selectedLessonTypeName))
-                .findFirst().orElse(null);
-
-            if (lessonType == null) {
-                JOptionPane.showMessageDialog(this, "Invalid lesson type selected.", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            Date selectedDate = new Date(((java.util.Date) dateSpinner.getValue()).getTime());
-            Date endDate = new Date(selectedDate.getTime() + (2L * 60 * 60 * 1000));
-
-            java.sql.Date sqlStartDate = new java.sql.Date(selectedDate.getTime());
-            java.sql.Date sqlEndDate = new java.sql.Date(endDate.getTime());
-
-            availableInstructors = Instructor.getAvailableInstructors(sqlStartDate, sqlEndDate, lessonType.getLessonTypeId());
-
-            DefaultListModel<String> model = new DefaultListModel<>();
-            for (Instructor instructor : availableInstructors) {
-                model.addElement(instructor.getFirstName() + " " + instructor.getLastName());
-            }
-            instructorList.setModel(model);
-
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, 
-                "Failed to load instructors: " + e.getMessage(), 
-                "Error", 
-                JOptionPane.ERROR_MESSAGE);
+        // Récupérer le type de leçon sélectionné
+        String selectedLessonTypeName = (String) lessonTypeComboBox.getSelectedItem();
+        if (selectedLessonTypeName == null) {
+            JOptionPane.showMessageDialog(this, "Please select a lesson type.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
         }
+
+        LessonType lessonType = LessonType.getAllLessonTypes().stream()
+            .filter(lt -> lt.getName().equals(selectedLessonTypeName))
+            .findFirst().orElse(null);
+
+        if (lessonType == null) {
+            JOptionPane.showMessageDialog(this, "Invalid lesson type selected.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Récupérer la date sélectionnée
+        Date selectedDate = (Date) dateSpinner.getValue();
+
+        // Ajuster l'heure de fin en fonction de la période et de la durée
+        Date endDate = null;
+        String selectedDuration = (String) durationComboBox.getSelectedItem();
+
+        if (selectedDuration != null && selectedDuration.contains("Private")) {
+            if(selectedDuration.contains("Private - 1 Hour"))
+            {  	
+            	Date Day = TimeAdjuster.adjustTimeToPeriod(new java.sql.Date(selectedDate.getTime()), LessonPeriod.PRIVATE_ONE_HOUR, true);
+
+            	java.sql.Date sqlDay = new java.sql.Date(Day.getTime());
+            	availableInstructors = Instructor.getAvailableInstructors(sqlDay, sqlDay, lessonType.getLessonTypeId(), selectedDuration.contains("Private"));
+            }
+            else 
+            {
+            	Date Day = TimeAdjuster.adjustTimeToPeriod(new java.sql.Date(selectedDate.getTime()), LessonPeriod.PRIVATE_TWO_HOUR, true);
+
+            	java.sql.Date sqlDay = new java.sql.Date(Day.getTime());
+            	availableInstructors = Instructor.getAvailableInstructors(sqlDay, sqlDay, lessonType.getLessonTypeId(), selectedDuration.contains("Private"));
+            }
+        } else {
+            // Cours collectif
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(selectedDate);
+
+            // Vérification pour le premier jour, matin (9h-12h) et après 3 jours, après-midi (14h-17h)
+            Date firstDayMorning = TimeAdjuster.adjustTimeToPeriod(new java.sql.Date(selectedDate.getTime()), LessonPeriod.MORNING, true);
+            calendar.add(Calendar.DATE, 3); // Ajouter 3 jours pour le dernier jour
+            Date lastDayAfternoon = TimeAdjuster.adjustTimeToPeriod(new java.sql.Date(calendar.getTimeInMillis()), LessonPeriod.AFTERNOON, false);
+
+            // Récupérer les instructeurs disponibles pour ces deux moments
+            java.sql.Date sqlFirstDayMorning = new java.sql.Date(firstDayMorning.getTime());
+            java.sql.Date sqlLastDayAfternoon = new java.sql.Date(lastDayAfternoon.getTime());
+
+            availableInstructors = Instructor.getAvailableInstructors(sqlFirstDayMorning, sqlLastDayAfternoon, lessonType.getLessonTypeId(), selectedDuration.contains("Private"));
+        }
+
+        // Mise à jour de la liste des instructeurs
+        DefaultListModel<String> model = new DefaultListModel<>();
+        for (Instructor instructor : availableInstructors) {
+            model.addElement(instructor.getFirstName() + " " + instructor.getLastName());
+        }
+        instructorList.setModel(model);
     }
+
+
 
     private void submitLesson(List<Instructor> availableInstructors, List<LessonType> lessonTypes, CardLayout cardLayout, JPanel mainPanel) {
         if (lessonTypes == null) {

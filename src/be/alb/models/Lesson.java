@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import be.alb.dao.LessonDAO;
+import be.alb.enums.LessonPeriod;
 import be.alb.enums.LessonTypeEnum;
+import be.alb.utils.TimeAdjuster;
 
 public class Lesson {
     private int lessonId;
@@ -95,41 +97,42 @@ public class Lesson {
 
     // Static method to handle lesson creation
     public static boolean createLesson(Date startDate, Date endDate, Instructor instructor, LessonType lessonType, boolean isPrivate) {
-        if (isPrivate) {
-        	startDate = new Date(startDate.getTime() + 12 * 60 * 60 * 1000); // 12:00
-            Lesson privateLesson = new Lesson(0, startDate, endDate, instructor, lessonType, true);
-            return LessonDAO.createLesson(privateLesson);
-        } else {
-            // Create group lessons for 3 days
+    	if (isPrivate) {
+    	    startDate = TimeAdjuster.adjustTimeToSpecificHour(startDate, LessonPeriod.PRIVATE_HOUR_START);
+    	    Lesson privateLesson = new Lesson(0, startDate, endDate, instructor, lessonType, true);
+    	    return LessonDAO.createLesson(privateLesson);
+    	}
+    	else {
+            // Créer des cours collectifs sur 3 jours
             List<Lesson> groupLessons = new ArrayList<>();
-            long oneDay = 24 * 60 * 60 * 1000; // Milliseconds in one day
+            long oneDay = 24 * 60 * 60 * 1000; // Millisecondes dans un jour
             Date currentDate = startDate;
 
             for (int i = 0; i < 3; i++) {
-                // Morning session
+                // Session du matin
                 groupLessons.add(new Lesson(
                     0,
-                    new Date(currentDate.getTime() + 9 * 60 * 60 * 1000), // 9:00
-                    new Date(currentDate.getTime() + 12 * 60 * 60 * 1000), // 12:00
+                    TimeAdjuster.adjustTimeToPeriod(currentDate, LessonPeriod.MORNING, true), 
+                    TimeAdjuster.adjustTimeToPeriod(currentDate, LessonPeriod.MORNING, false), // Fin matinée (12h)
                     instructor,
                     lessonType,
                     false
                 ));
-                // Afternoon session
+                // Session de l'après-midi
                 groupLessons.add(new Lesson(
                     0,
-                    new Date(currentDate.getTime() + 14 * 60 * 60 * 1000), // 14:00
-                    new Date(currentDate.getTime() + 17 * 60 * 60 * 1000), // 17:00
+                    TimeAdjuster.adjustTimeToPeriod(currentDate, LessonPeriod.AFTERNOON, true), // Début après-midi (13h)
+                    TimeAdjuster.adjustTimeToPeriod(currentDate, LessonPeriod.AFTERNOON, false), // Fin après-midi (17h)
                     instructor,
                     lessonType,
                     false
                 ));
 
-                // Move to the next day
+                // Passer au jour suivant
                 currentDate = new Date(currentDate.getTime() + oneDay);
             }
 
-            // Save all group lessons
+            // Sauvegarder tous les cours collectifs
             return LessonDAO.createGroupLessons(groupLessons);
         }
     }
