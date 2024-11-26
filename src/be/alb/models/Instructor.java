@@ -1,5 +1,7 @@
 package be.alb.models;
 
+import java.sql.Date;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +26,12 @@ public class Instructor extends Person {
         super(id, firstName, lastName, city, postalCode, streetName, streetNumber, dob);
         this.accreditations = new ArrayList<>();
         this.lessons = new ArrayList<>();
+    }
+    
+    public Instructor(int id, String firstName, String lastName, String city, String postalCode, String streetName, String streetNumber, LocalDate dob,
+    		List<Accreditation> accreditations) {
+        super(id, firstName, lastName, city, postalCode, streetName, streetNumber, dob);
+        this.accreditations = accreditations;
     }
     
 
@@ -121,5 +129,14 @@ public class Instructor extends Person {
         result.add(0, "1");
         return result;
     }
-
+    
+    public static List<Instructor> getAvailableInstructors(Date startDate, Date endDate, int lessonTypeId)
+    {
+    	
+    	List<Instructor> instructors = new ArrayList<>();
+    	InstructorDAO instructorDAO = new InstructorDAO();
+    	instructors = instructorDAO.getAvailableInstructors(startDate, endDate, lessonTypeId);
+    	
+    	return instructors;
+    }   
 }

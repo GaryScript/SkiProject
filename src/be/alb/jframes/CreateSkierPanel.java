@@ -1,6 +1,9 @@
 package be.alb.jframes;
 
 import javax.swing.*;
+
+import com.toedter.calendar.JDateChooser;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -8,7 +11,7 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
 import be.alb.models.Skier;
-import com.toedter.calendar.JDateChooser;
+
 
 public class CreateSkierPanel extends JPanel {
 

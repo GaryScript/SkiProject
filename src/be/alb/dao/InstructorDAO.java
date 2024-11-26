@@ -11,7 +11,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class InstructorDAO {
 
@@ -131,4 +133,63 @@ public class InstructorDAO {
             }
         }
     }
+	
+	public List<Instructor> getAvailableInstructors(Date startDate, Date endDate, int lessonTypeId) {
+	    List<Instructor> availableInstructors = new ArrayList<>();
+	    Connection connection = OracleDBConnection.getInstance();
+
+	    String sql = "SELECT DISTINCT i.INSTRUCTORID, i.FIRSTNAME, i.LASTNAME, i.CITY, i.POSTALCODE, i.STREETNAME, i.STREETNUMBER, i.DOB, " +
+	                 "a.ACCREDITATIONID, a.NAME AS ACCREDITATION_NAME " +
+	                 "FROM INSTRUCTORS i " +
+	                 "JOIN INSTRUCTORACCREDITATION ia ON i.INSTRUCTORID = ia.INSTRUCTORID " +
+	                 "JOIN ACCREDITATIONS a ON ia.ACCREDITATIONID = a.ACCREDITATIONID " +
+	                 "JOIN LESSONTYPE lt ON a.ACCREDITATIONID = lt.ACCREDITATIONID " +
+	                 "LEFT JOIN LESSONS l ON i.INSTRUCTORID = l.INSTRUCTORID " +
+	                 "WHERE lt.LESSONTYPEID = ? " +
+	                 "AND (l.STARTDATE IS NULL " +
+	                 "     OR NOT (l.STARTDATE <= ? AND l.ENDDATE >= ?)) " +
+	                 "AND a.ACCREDITATIONID = lt.ACCREDITATIONID " +
+	                 "ORDER BY i.LASTNAME, i.FIRSTNAME";
+
+	    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+	        stmt.setInt(1, lessonTypeId);
+	        stmt.setDate(2, new java.sql.Date(endDate.getTime())); // Date de fin de la plage
+	        stmt.setDate(3, new java.sql.Date(startDate.getTime())); // Date de début de la plage
+
+	        try (ResultSet rs = stmt.executeQuery()) {
+	            Map<Integer, Instructor> instructorMap = new HashMap<>();
+
+	            while (rs.next()) {
+	                int instructorId = rs.getInt("INSTRUCTORID");
+
+	                if (!instructorMap.containsKey(instructorId)) {
+	                    Instructor instructor = new Instructor(
+	                        instructorId,
+	                        rs.getString("FIRSTNAME"),
+	                        rs.getString("LASTNAME"),
+	                        rs.getString("CITY"),
+	                        rs.getString("POSTALCODE"),
+	                        rs.getString("STREETNAME"),
+	                        rs.getString("STREETNUMBER"),
+	                        rs.getDate("DOB").toLocalDate(),
+	                        new ArrayList<>()
+	                    );
+	                    instructorMap.put(instructorId, instructor);
+	                }
+
+	                Accreditation accreditation = new Accreditation(
+	                    rs.getInt("ACCREDITATIONID"),
+	                    rs.getString("ACCREDITATION_NAME")
+	                );
+	                instructorMap.get(instructorId).getAccreditations().add(accreditation);
+	            }
+
+	            availableInstructors.addAll(instructorMap.values());
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return availableInstructors;
+	}	
 }
