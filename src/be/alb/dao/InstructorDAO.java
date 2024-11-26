@@ -149,13 +149,14 @@ public class InstructorDAO {
 	                 "WHERE lt.LESSONTYPEID = ? " +
 	                 "AND a.ACCREDITATIONID = lt.ACCREDITATIONID ";
 
-	    // Si c'est une leçon privée, on vérifie une seule date (startDate)
 	    if (isPrivateLesson) {
-	        sql += "AND (l.STARTDATE IS NULL OR l.STARTDATE != ?) ";  // Vérifier que l'instructeur n'est pas déjà occupé à cette date
+	        // Leçon privée: l'instructeur doit être libre à la startDate
+	        sql += "AND (l.STARTDATE IS NULL OR l.STARTDATE != ?) ";
 	    } else {
-	        // Pour les leçons collectives, vérifier le chevauchement des dates
-	        sql += "AND (l.STARTDATE IS NULL " +
-	               "     OR NOT (l.STARTDATE <= ? AND l.ENDDATE >= ?)) ";
+	        // Leçon collective: vérifier les chevauchements des dates
+	        sql += "AND (l.STARTDATE IS NULL OR " +
+	               "(l.ENDDATE <= ? OR l.STARTDATE >= ? OR " +
+	               "(l.STARTDATE < ? AND l.ENDDATE > ?))) ";
 	    }
 
 	    sql += "ORDER BY i.LASTNAME, i.FIRSTNAME";
@@ -163,13 +164,15 @@ public class InstructorDAO {
 	    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
 	        stmt.setInt(1, lessonTypeId);
 
-	        // Si c'est une leçon privée, utiliser la seule date de début
+	        // Si c'est une leçon privée, vérifier la seule startDate
 	        if (isPrivateLesson) {
-	            stmt.setDate(2, new java.sql.Date(startDate.getTime())); // Vérifier la disponibilité à la date donnée
+	            stmt.setDate(2, new java.sql.Date(startDate.getTime()));
 	        } else {
-	            // Si c'est une leçon collective, utiliser les dates de début et de fin
-	            stmt.setDate(2, new java.sql.Date(endDate.getTime())); // Date de fin de la plage
-	            stmt.setDate(3, new java.sql.Date(startDate.getTime())); // Date de début de la plage
+	            // Leçon collective: vérifier les deux dates (startDate et endDate)
+	            stmt.setDate(2, new java.sql.Date(endDate.getTime())); // Date de fin
+	            stmt.setDate(3, new java.sql.Date(startDate.getTime())); // Date de début
+	            stmt.setDate(4, new java.sql.Date(startDate.getTime())); // Date de début de la leçon à vérifier
+	            stmt.setDate(5, new java.sql.Date(endDate.getTime()));   // Date de fin de la leçon à vérifier
 	        }
 
 	        try (ResultSet rs = stmt.executeQuery()) {
@@ -208,5 +211,9 @@ public class InstructorDAO {
 
 	    return availableInstructors;
 	}
+
+
+
+
 
 }
