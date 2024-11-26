@@ -22,4 +22,29 @@ public enum LessonTypeEnum {
     public int getMaxBookings() {
         return maxBookings;
     }
+
+    // Map the lesson type name to the corresponding enum value
+    public static LessonTypeEnum fromLessonTypeName(String lessonTypeName) {
+        switch (lessonTypeName) {
+            case "Ski de Fond":
+            case "Télémark":
+            case "Ski Adulte Niveau 1-4":
+            case "Ski Adulte Hors-piste":
+                return ADULT;
+            case "Ski de Fond 1-4":
+            case "Ski Bronze":
+            case "Ski Argent":
+            case "Ski Or":
+            case "Ski Platine":
+            case "Ski Diamant":
+            case "Ski Compétition":
+            case "Ski Hors-piste":
+            case "Snowboard Niveau 1":
+            case "Snowboard Niveau 2-4":
+            case "Snowboard Hors-piste":
+                return CHILD;
+            default:
+                throw new IllegalArgumentException("Unknown lesson type: " + lessonTypeName);
+        }
+    }
 }

@@ -14,7 +14,10 @@ public class Lesson {
     private Instructor instructor;
     private LessonType lessonType;
     private boolean isPrivate;
+    private int minBookings;
+    private int maxBookings;
 
+    // Constructor
     public Lesson(int lessonId, Date startDate, Date endDate, Instructor instructor, LessonType lessonType, boolean isPrivate) {
         this.lessonId = lessonId;
         this.startDate = startDate;
@@ -22,6 +25,15 @@ public class Lesson {
         this.instructor = instructor;
         this.lessonType = lessonType;
         this.isPrivate = isPrivate;
+
+        // Set min and max bookings automatically from LessonTypeEnum based on the lessonType name
+        try {
+            LessonTypeEnum lessonTypeEnum = LessonTypeEnum.fromLessonTypeName(lessonType.getName());
+            this.minBookings = lessonTypeEnum.getMinBookings();
+            this.maxBookings = lessonTypeEnum.getMaxBookings();
+        } catch (IllegalArgumentException e) {
+            System.out.println("Error mapping lesson type: " + e.getMessage());
+        }
     }
 
     // Getters and Setters
@@ -73,19 +85,26 @@ public class Lesson {
         this.isPrivate = isPrivate;
     }
 
-    // Static method to handle creation of lessons
+    public int getMinBookings() {
+        return minBookings;
+    }
+
+    public int getMaxBookings() {
+        return maxBookings;
+    }
+
+    // Static method to handle lesson creation
     public static boolean createLesson(Date startDate, Date endDate, Instructor instructor, LessonType lessonType, boolean isPrivate) {
         if (isPrivate) {
-            // Create a single private lesson
             Lesson privateLesson = new Lesson(0, startDate, endDate, instructor, lessonType, true);
             return LessonDAO.createLesson(privateLesson);
         } else {
-            // Create group lessons (6 lessons: 3 mornings, 3 afternoons)
+            // Create group lessons for 3 days
             List<Lesson> groupLessons = new ArrayList<>();
             long oneDay = 24 * 60 * 60 * 1000; // Milliseconds in one day
             Date currentDate = startDate;
 
-            for (int i = 0; i < 3; i++) { // Loop for 3 days
+            for (int i = 0; i < 3; i++) {
                 // Morning session
                 groupLessons.add(new Lesson(
                     0,
