@@ -312,12 +312,13 @@ public class LessonDAO {
         try {
             connection = OracleDBConnection.getInstance(); 
 
-            // Requête pour récupérer uniquement les leçons publiques
+            // Requête pour récupérer uniquement les leçons publiques, incluant le groupId et les flags isFirstDay et isLastDay
             String query = """
                     SELECT l.LESSONID, l.STARTDATE, l.ENDDATE, l.ISPRIVATE, l.LESSONTYPEID, l.INSTRUCTORID,
                            lt.NAME AS LESSONTYPE_NAME, lt.AGEGROUP, lt.SPORTTYPE, lt.PRICE, lt.ACCREDITATIONID AS LESSONTYPE_ACC_ID,
                            i.LASTNAME, i.FIRSTNAME, i.CITY, i.POSTALCODE, i.STREETNAME, i.STREETNUMBER, i.DOB,
-                           a.ACCREDITATIONID AS INST_ACC_ID, a.NAME AS ACCREDITATION_NAME
+                           a.ACCREDITATIONID AS INST_ACC_ID, a.NAME AS ACCREDITATION_NAME,
+                           l.LESSONGROUPID, l.ISFIRSTDAY, l.ISLASTDAY
                     FROM LESSONS l
                     JOIN LESSONTYPE lt ON l.LESSONTYPEID = lt.LESSONTYPEID
                     LEFT JOIN INSTRUCTORS i ON l.INSTRUCTORID = i.INSTRUCTORID
@@ -379,8 +380,14 @@ public class LessonDAO {
                                           dobLocalDate, accreditations);
                 });
 
-                // Création de l'objet Lesson
-                Lesson lesson = new Lesson(lessonId, startDate, endDate, instructor, lessonType, isPrivate);
+                // Récupérer les nouvelles informations
+                int lessonGroupId = rs.getInt("LESSONGROUPID");
+                boolean isFirstDay = rs.getInt("ISFIRSTDAY") == 1;
+                boolean isLastDay = rs.getInt("ISLASTDAY") == 1;
+
+                // Création de l'objet Lesson avec les nouveaux attributs
+                Lesson lesson = new Lesson(lessonId, startDate, endDate, instructor, lessonType, 
+                                           isPrivate, isFirstDay, isLastDay, lessonGroupId);
                 lessons.add(lesson);
             }
 
@@ -392,6 +399,7 @@ public class LessonDAO {
 
         return lessons;
     }
+
 
 
 }

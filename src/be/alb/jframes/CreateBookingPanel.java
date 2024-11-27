@@ -9,6 +9,8 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class CreateBookingPanel extends JPanel {
 
@@ -28,6 +30,10 @@ public class CreateBookingPanel extends JPanel {
         titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
         add(titleLabel, BorderLayout.NORTH);
 
+        // Panel principal pour le choix entre leçon privée et publique et les tableaux
+        JPanel contentPanel = new JPanel();
+        contentPanel.setLayout(new BorderLayout());
+
         // Panel pour choisir entre leçon privée et publique
         JPanel lessonChoicePanel = new JPanel();
         privateLessonButton = new JRadioButton("Private Lesson");
@@ -39,17 +45,19 @@ public class CreateBookingPanel extends JPanel {
         lessonChoicePanel.add(privateLessonButton);
         lessonChoicePanel.add(publicLessonButton);
 
-        add(lessonChoicePanel, BorderLayout.NORTH);
+        contentPanel.add(lessonChoicePanel, BorderLayout.NORTH);
 
         // Tableau pour afficher les leçons
         lessonTable = new JTable();
         JScrollPane scrollPaneLessons = new JScrollPane(lessonTable);
-        add(scrollPaneLessons, BorderLayout.WEST);
+        contentPanel.add(scrollPaneLessons, BorderLayout.WEST);
 
         // Tableau pour afficher les élèves
         skierTable = new JTable();
         JScrollPane scrollPaneSkiers = new JScrollPane(skierTable);
-        add(scrollPaneSkiers, BorderLayout.CENTER);
+        contentPanel.add(scrollPaneSkiers, BorderLayout.CENTER);
+
+        add(contentPanel, BorderLayout.CENTER);
 
         // Boutons
         JPanel buttonPanel = new JPanel();
@@ -64,8 +72,8 @@ public class CreateBookingPanel extends JPanel {
 
         // Action du bouton Back
         backButton.addActionListener(e -> {
-            // Remettre à l'écran principal ou le panneau précédent
-            cardLayout.show(mainPanel, "MainScreen"); // Adaptez selon le nom du panel
+       
+            cardLayout.show(mainPanel, "MainScreen");
         });
 
         // Action du bouton Submit
@@ -95,28 +103,48 @@ public class CreateBookingPanel extends JPanel {
     // Charger les leçons privées ou publiques en fonction de l'option sélectionnée
     private void loadLessonData(boolean isPrivate) {
         try {
-            // Si la leçon est privée, utiliser getAllPrivateLessons, sinon getAllPublicLessons
-            if (isPrivate) {
-                lessons = Lesson.getAllPrivateLessons();
-            } else {
-                lessons = Lesson.getAllPublicLessons();
-            }
-
-            // Configuration des colonnes du tableau des leçons
-            String[] columnNames = {"Lesson Type", "Instructor", "Start Time", "End Time", "Private"};
+            // Création du modèle de table
+            String[] columnNames = {"Lesson Type", "Instructor", "Start Date", "End Date"};
             DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
 
-            // Ajouter les données au modèle
-            for (Lesson lesson : lessons) {
-                String lessonTypeName = lesson.getLessonType().getName();
-                String instructorName = lesson.getInstructor() != null
-                        ? lesson.getInstructor().getFirstName() + " " + lesson.getInstructor().getLastName()
-                        : "None";
-                String startTime = lesson.getStartDate().toString();
-                String endTime = lesson.getEndDate().toString();
-                String isItPrivate = lesson.isPrivate() ? "Yes" : "No";
+            // Charger les leçons en fonction de l'option privée ou publique
+            if (isPrivate) {
+                lessons = Lesson.getAllPrivateLessons();  // Charger les leçons privées
+            } else {
+                // Charger les leçons publiques et les regrouper par groupId
+                lessons = Lesson.getAllPublicLessons();
+                Map<Integer, List<Lesson>> groupedLessons = lessons.stream()
+                        .collect(Collectors.groupingBy(Lesson::getLessonGroupId));  // Regroupement par groupId
 
-                tableModel.addRow(new Object[]{lessonTypeName, instructorName, startTime, endTime, isItPrivate});
+                // Ajouter les données au modèle de table
+                for (Map.Entry<Integer, List<Lesson>> entry : groupedLessons.entrySet()) {
+                    List<Lesson> groupLessons = entry.getValue();
+                    // Récupérer les informations communes du groupe
+                    Lesson firstLesson = groupLessons.get(0);  // Prendre la première leçon du groupe
+                    String lessonTypeName = firstLesson.getLessonType().getName();
+                    String instructorName = firstLesson.getInstructor() != null
+                            ? firstLesson.getInstructor().getFirstName() + " " + firstLesson.getInstructor().getLastName()
+                            : "None";
+                    String startTime = firstLesson.getStartDate().toString();
+                    String endTime = groupLessons.get(groupLessons.size() - 1).getEndDate().toString();  // Dernière leçon du groupe
+
+                    // Ajouter les données du groupe au tableau
+                    tableModel.addRow(new Object[]{lessonTypeName, instructorName, startTime, endTime});
+                }
+                // Si ce n'est pas un cours public groupé, on n'ajoute rien ici pour les leçons publiques non groupées
+            }
+
+            // Ajouter les leçons privées
+            if (isPrivate) {
+                for (Lesson lesson : lessons) {
+                    String lessonTypeName = lesson.getLessonType().getName();
+                    String instructorName = lesson.getInstructor() != null
+                            ? lesson.getInstructor().getFirstName() + " " + lesson.getInstructor().getLastName()
+                            : "None";
+                    String startTime = lesson.getStartDate().toString();
+                    String endTime = lesson.getEndDate().toString();
+                    tableModel.addRow(new Object[]{lessonTypeName, instructorName, startTime, endTime});
+                }
             }
 
             // Appliquer le modèle au tableau
@@ -126,6 +154,9 @@ public class CreateBookingPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Error loading lessons: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+
+
+
 
     // Charger les skieurs depuis la méthode getAllSkiers
     private void loadSkierData() {

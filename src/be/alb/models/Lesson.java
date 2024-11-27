@@ -19,7 +19,10 @@ public class Lesson {
     private boolean isPrivate;
     private int minBookings;
     private int maxBookings;
-
+    private boolean isFirstDay;
+    private boolean isLastDay;
+    private int lessonGroupId;
+    
     // Constructor
     public Lesson(int lessonId, Date startDate, Date endDate, Instructor instructor, LessonType lessonType, boolean isPrivate) {
         this.lessonId = lessonId;
@@ -38,7 +41,29 @@ public class Lesson {
             System.out.println("Error mapping lesson type: " + e.getMessage());
         }
     }
-
+    
+    public Lesson(int lessonId, Date startDate, Date endDate, Instructor instructor, 
+            LessonType lessonType, boolean isPrivate, boolean isFirstDay, boolean isLastDay, int lessonGroupId) {
+		  this.lessonId = lessonId;
+		  this.startDate = startDate;
+		  this.endDate = endDate;
+		  this.instructor = instructor;
+		  this.lessonType = lessonType;
+		  this.isPrivate = isPrivate;
+		  this.isFirstDay = isFirstDay;
+		  this.isLastDay = isLastDay;
+		  this.lessonGroupId = lessonGroupId;
+		
+		  // Set min and max bookings automatically from LessonTypeEnum based on the lessonType name
+		  try {
+		      LessonTypeEnum lessonTypeEnum = LessonTypeEnum.fromLessonTypeName(lessonType.getName());
+		      this.minBookings = lessonTypeEnum.getMinBookings();
+		      this.maxBookings = lessonTypeEnum.getMaxBookings();
+		  } catch (IllegalArgumentException e) {
+		      System.out.println("Error mapping lesson type: " + e.getMessage());
+		  }
+    }
+    
     // Getters and Setters
     public int getLessonId() {
         return lessonId;
@@ -94,6 +119,30 @@ public class Lesson {
 
     public int getMaxBookings() {
         return maxBookings;
+    }
+    
+    public boolean isFirstDay() {
+        return isFirstDay;
+    }
+
+    public void setFirstDay(boolean isFirstDay) {
+        this.isFirstDay = isFirstDay;
+    }
+
+    public boolean isLastDay() {
+        return isLastDay;
+    }
+
+    public void setLastDay(boolean isLastDay) {
+        this.isLastDay = isLastDay;
+    }
+
+    public int getLessonGroupId() {
+        return lessonGroupId;
+    }
+
+    public void setLessonGroupId(int lessonGroupId) {
+        this.lessonGroupId = lessonGroupId;
     }
 
     // Static method to handle lesson creation
