@@ -16,7 +16,10 @@ public class CreateBookingPanel extends JPanel {
     private JTable skierTable;
     private List<Skier> skiers;
     private List<Lesson> lessons;
-    
+    private JRadioButton privateLessonButton;
+    private JRadioButton publicLessonButton;
+    private ButtonGroup lessonTypeGroup;
+
     public CreateBookingPanel(CardLayout cardLayout, JPanel mainPanel) {
         setLayout(new BorderLayout());
 
@@ -24,6 +27,19 @@ public class CreateBookingPanel extends JPanel {
         JLabel titleLabel = new JLabel("Create Booking", JLabel.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
         add(titleLabel, BorderLayout.NORTH);
+
+        // Panel pour choisir entre leçon privée et publique
+        JPanel lessonChoicePanel = new JPanel();
+        privateLessonButton = new JRadioButton("Private Lesson");
+        publicLessonButton = new JRadioButton("Public Lesson");
+        lessonTypeGroup = new ButtonGroup();
+        lessonTypeGroup.add(privateLessonButton);
+        lessonTypeGroup.add(publicLessonButton);
+
+        lessonChoicePanel.add(privateLessonButton);
+        lessonChoicePanel.add(publicLessonButton);
+
+        add(lessonChoicePanel, BorderLayout.NORTH);
 
         // Tableau pour afficher les leçons
         lessonTable = new JTable();
@@ -44,7 +60,6 @@ public class CreateBookingPanel extends JPanel {
         add(buttonPanel, BorderLayout.SOUTH);
 
         // Charger les données des leçons et élèves
-        loadLessonData();
         loadSkierData();
 
         // Action du bouton Back
@@ -71,13 +86,21 @@ public class CreateBookingPanel extends JPanel {
             // Ici, vous pouvez effectuer les actions nécessaires (par exemple, associer le skieur à la leçon)
             JOptionPane.showMessageDialog(this, "Booking created for " + selectedSkier.getFirstName() + " " + selectedSkier.getLastName() + " for the lesson " + selectedLesson.getLessonType().getName(), "Booking Confirmed", JOptionPane.INFORMATION_MESSAGE);
         });
+
+        // Action de changement de sélection de type de leçon
+        privateLessonButton.addActionListener(e -> loadLessonData(true)); // Load private lessons
+        publicLessonButton.addActionListener(e -> loadLessonData(false)); // Load public lessons
     }
 
-    // Charger les leçons depuis la méthode getAllLessons
-    private void loadLessonData() {
+    // Charger les leçons privées ou publiques en fonction de l'option sélectionnée
+    private void loadLessonData(boolean isPrivate) {
         try {
-            // Appel à la méthode getAllLessons pour récupérer les leçons
-            lessons = Lesson.getAllLessons();
+            // Si la leçon est privée, utiliser getAllPrivateLessons, sinon getAllPublicLessons
+            if (isPrivate) {
+                lessons = Lesson.getAllPrivateLessons();
+            } else {
+                lessons = Lesson.getAllPublicLessons();
+            }
 
             // Configuration des colonnes du tableau des leçons
             String[] columnNames = {"Lesson Type", "Instructor", "Start Time", "End Time", "Private"};
@@ -91,9 +114,9 @@ public class CreateBookingPanel extends JPanel {
                         : "None";
                 String startTime = lesson.getStartDate().toString();
                 String endTime = lesson.getEndDate().toString();
-                String isPrivate = lesson.isPrivate() ? "Yes" : "No";
+                String isItPrivate = lesson.isPrivate() ? "Yes" : "No";
 
-                tableModel.addRow(new Object[]{lessonTypeName, instructorName, startTime, endTime, isPrivate});
+                tableModel.addRow(new Object[]{lessonTypeName, instructorName, startTime, endTime, isItPrivate});
             }
 
             // Appliquer le modèle au tableau
