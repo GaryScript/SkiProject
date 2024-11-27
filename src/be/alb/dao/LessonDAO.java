@@ -212,4 +212,186 @@ public class LessonDAO {
 
         return lessons;
     }
+    
+    public List<Lesson> getAllPrivateLessons() throws SQLException {
+        List<Lesson> lessons = new ArrayList<>();
+        Connection connection = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            connection = OracleDBConnection.getInstance(); 
+
+            // Requête pour récupérer uniquement les leçons privées
+            String query = """
+                    SELECT l.LESSONID, l.STARTDATE, l.ENDDATE, l.ISPRIVATE, l.LESSONTYPEID, l.INSTRUCTORID,
+                           lt.NAME AS LESSONTYPE_NAME, lt.AGEGROUP, lt.SPORTTYPE, lt.PRICE, lt.ACCREDITATIONID AS LESSONTYPE_ACC_ID,
+                           i.LASTNAME, i.FIRSTNAME, i.CITY, i.POSTALCODE, i.STREETNAME, i.STREETNUMBER, i.DOB,
+                           a.ACCREDITATIONID AS INST_ACC_ID, a.NAME AS ACCREDITATION_NAME
+                    FROM LESSONS l
+                    JOIN LESSONTYPE lt ON l.LESSONTYPEID = lt.LESSONTYPEID
+                    LEFT JOIN INSTRUCTORS i ON l.INSTRUCTORID = i.INSTRUCTORID
+                    LEFT JOIN INSTRUCTORACCREDITATION ia ON i.INSTRUCTORID = ia.INSTRUCTORID
+                    LEFT JOIN ACCREDITATIONS a ON lt.ACCREDITATIONID = a.ACCREDITATIONID
+                    WHERE l.ISPRIVATE = 1
+                    """;
+
+            stmt = connection.prepareStatement(query);
+            rs = stmt.executeQuery();
+
+            // Structures temporaires pour gérer les relations
+            Map<Integer, Accreditation> accreditationMap = new HashMap<>();
+            Map<Integer, LessonType> lessonTypeMap = new HashMap<>();
+            Map<Integer, Instructor> instructorMap = new HashMap<>();
+            Map<Integer, List<Accreditation>> instructorAccreditationsMap = new HashMap<>();
+
+            while (rs.next()) {
+                int lessonId = rs.getInt("LESSONID");
+                Date startDate = rs.getDate("STARTDATE"); 
+                Date endDate = rs.getDate("ENDDATE");
+
+                boolean isPrivate = rs.getInt("ISPRIVATE") == 1;
+
+                int lessonTypeId = rs.getInt("LESSONTYPEID");
+                String lessonTypeName = rs.getString("LESSONTYPE_NAME");
+                String ageGroup = rs.getString("AGEGROUP");
+                String sportType = rs.getString("SPORTTYPE");
+                double price = rs.getDouble("PRICE");
+                int lessonTypeAccreditationId = rs.getInt("LESSONTYPE_ACC_ID");
+
+                int instructorId = rs.getInt("INSTRUCTORID");
+                String firstName = rs.getString("FIRSTNAME");
+                String lastName = rs.getString("LASTNAME");
+                String city = rs.getString("CITY");
+                String postalCode = rs.getString("POSTALCODE");
+                String streetName = rs.getString("STREETNAME");
+                String streetNumber = rs.getString("STREETNUMBER");
+                Date dob = rs.getDate("DOB");
+
+                // Récupérer les informations des accréditations
+                int accreditationId = rs.getInt("INST_ACC_ID");
+                String accreditationName = rs.getString("ACCREDITATION_NAME");
+
+                // Gestion des accréditations
+                Accreditation accreditation = accreditationMap.computeIfAbsent(accreditationId, 
+                    id -> new Accreditation(id, accreditationName));
+
+                // Gestion des LessonTypes
+                LessonType lessonType = lessonTypeMap.computeIfAbsent(lessonTypeId, 
+                    id -> new LessonType(id, lessonTypeName, ageGroup, sportType, price, accreditation));
+
+                // Gestion des Instructors
+                Instructor instructor = instructorMap.computeIfAbsent(instructorId, id -> {
+                    List<Accreditation> accreditations = new ArrayList<>();
+                    accreditations.add(accreditation); 
+                    LocalDate dobLocalDate = (dob != null ? dob.toLocalDate() : null);
+                    return new Instructor(id, firstName, lastName, city, postalCode, streetName, streetNumber, 
+                                          dobLocalDate, accreditations);
+                });
+
+                // Création de l'objet Lesson
+                Lesson lesson = new Lesson(lessonId, startDate, endDate, instructor, lessonType, isPrivate);
+                lessons.add(lesson);
+            }
+
+        } finally {
+            if (rs != null) rs.close();
+            if (stmt != null) stmt.close();
+            //if (connection != null) connection.close();
+        }
+
+        return lessons;
+    }
+    
+    public List<Lesson> getAllPublicLessons() throws SQLException {
+        List<Lesson> lessons = new ArrayList<>();
+        Connection connection = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            connection = OracleDBConnection.getInstance(); 
+
+            // Requête pour récupérer uniquement les leçons publiques
+            String query = """
+                    SELECT l.LESSONID, l.STARTDATE, l.ENDDATE, l.ISPRIVATE, l.LESSONTYPEID, l.INSTRUCTORID,
+                           lt.NAME AS LESSONTYPE_NAME, lt.AGEGROUP, lt.SPORTTYPE, lt.PRICE, lt.ACCREDITATIONID AS LESSONTYPE_ACC_ID,
+                           i.LASTNAME, i.FIRSTNAME, i.CITY, i.POSTALCODE, i.STREETNAME, i.STREETNUMBER, i.DOB,
+                           a.ACCREDITATIONID AS INST_ACC_ID, a.NAME AS ACCREDITATION_NAME
+                    FROM LESSONS l
+                    JOIN LESSONTYPE lt ON l.LESSONTYPEID = lt.LESSONTYPEID
+                    LEFT JOIN INSTRUCTORS i ON l.INSTRUCTORID = i.INSTRUCTORID
+                    LEFT JOIN INSTRUCTORACCREDITATION ia ON i.INSTRUCTORID = ia.INSTRUCTORID
+                    LEFT JOIN ACCREDITATIONS a ON lt.ACCREDITATIONID = a.ACCREDITATIONID
+                    WHERE l.ISPRIVATE = 0
+                    """;
+
+            stmt = connection.prepareStatement(query);
+            rs = stmt.executeQuery();
+
+            // Structures temporaires pour gérer les relations
+            Map<Integer, Accreditation> accreditationMap = new HashMap<>();
+            Map<Integer, LessonType> lessonTypeMap = new HashMap<>();
+            Map<Integer, Instructor> instructorMap = new HashMap<>();
+            Map<Integer, List<Accreditation>> instructorAccreditationsMap = new HashMap<>();
+
+            while (rs.next()) {
+                int lessonId = rs.getInt("LESSONID");
+                Date startDate = rs.getDate("STARTDATE"); 
+                Date endDate = rs.getDate("ENDDATE");
+
+                boolean isPrivate = rs.getInt("ISPRIVATE") == 1;
+
+                int lessonTypeId = rs.getInt("LESSONTYPEID");
+                String lessonTypeName = rs.getString("LESSONTYPE_NAME");
+                String ageGroup = rs.getString("AGEGROUP");
+                String sportType = rs.getString("SPORTTYPE");
+                double price = rs.getDouble("PRICE");
+                int lessonTypeAccreditationId = rs.getInt("LESSONTYPE_ACC_ID");
+
+                int instructorId = rs.getInt("INSTRUCTORID");
+                String firstName = rs.getString("FIRSTNAME");
+                String lastName = rs.getString("LASTNAME");
+                String city = rs.getString("CITY");
+                String postalCode = rs.getString("POSTALCODE");
+                String streetName = rs.getString("STREETNAME");
+                String streetNumber = rs.getString("STREETNUMBER");
+                Date dob = rs.getDate("DOB");
+
+                // Récupérer les informations des accréditations
+                int accreditationId = rs.getInt("INST_ACC_ID");
+                String accreditationName = rs.getString("ACCREDITATION_NAME");
+
+                // Gestion des accréditations
+                Accreditation accreditation = accreditationMap.computeIfAbsent(accreditationId, 
+                    id -> new Accreditation(id, accreditationName));
+
+                // Gestion des LessonTypes
+                LessonType lessonType = lessonTypeMap.computeIfAbsent(lessonTypeId, 
+                    id -> new LessonType(id, lessonTypeName, ageGroup, sportType, price, accreditation));
+
+                // Gestion des Instructors
+                Instructor instructor = instructorMap.computeIfAbsent(instructorId, id -> {
+                    List<Accreditation> accreditations = new ArrayList<>();
+                    accreditations.add(accreditation); 
+                    LocalDate dobLocalDate = (dob != null ? dob.toLocalDate() : null);
+                    return new Instructor(id, firstName, lastName, city, postalCode, streetName, streetNumber, 
+                                          dobLocalDate, accreditations);
+                });
+
+                // Création de l'objet Lesson
+                Lesson lesson = new Lesson(lessonId, startDate, endDate, instructor, lessonType, isPrivate);
+                lessons.add(lesson);
+            }
+
+        } finally {
+            if (rs != null) rs.close();
+            if (stmt != null) stmt.close();
+            //if (connection != null) connection.close();
+        }
+
+        return lessons;
+    }
+
+
 }

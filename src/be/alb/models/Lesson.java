@@ -146,6 +146,27 @@ public class Lesson {
             throw new RuntimeException("Error retrieving lessons: " + e.getMessage(), e);
         }
     }
+    
+    public static List<Lesson> getAllPublicLessons() {
+        LessonDAO lessonDAO = new LessonDAO(); 
+        try {
+            return lessonDAO.getAllPublicLessons();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error retrieving lessons: " + e.getMessage(), e);
+        }
+    }
+    
+    public static List<Lesson> getAllPrivateLessons() {
+        LessonDAO lessonDAO = new LessonDAO(); 
+        try {
+            return lessonDAO.getAllPrivateLessons();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error retrieving lessons: " + e.getMessage(), e);
+        }
+    }
+    
+    
+    
 
    
 }
