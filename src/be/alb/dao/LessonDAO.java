@@ -173,7 +173,7 @@ public class LessonDAO {
         } finally {
             if (rs != null) rs.close();
             if (stmt != null) stmt.close();
-            if (connection != null) connection.close();
+            //if (connection != null) connection.close();
         }
 
         return lessons;

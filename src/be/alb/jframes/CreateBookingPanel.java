@@ -1,58 +1,96 @@
 package be.alb.jframes;
 
 import be.alb.models.Lesson;
+import be.alb.models.Skier;
+import be.alb.dao.SkierDAO;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.text.SimpleDateFormat;
+import java.sql.SQLException;
 import java.util.List;
 
 public class CreateBookingPanel extends JPanel {
 
     private JTable lessonTable;
-
+    private JTable skierTable;
+    private List<Skier> skiers;
+    private List<Lesson> lessons;
+    
     public CreateBookingPanel(CardLayout cardLayout, JPanel mainPanel) {
         setLayout(new BorderLayout());
 
         // Titre du panel
-        JLabel titleLabel = new JLabel("Create Lessons", JLabel.CENTER);
+        JLabel titleLabel = new JLabel("Create Booking", JLabel.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
         add(titleLabel, BorderLayout.NORTH);
 
         // Tableau pour afficher les leçons
         lessonTable = new JTable();
-        JScrollPane scrollPane = new JScrollPane(lessonTable);
-        add(scrollPane, BorderLayout.CENTER);
+        JScrollPane scrollPaneLessons = new JScrollPane(lessonTable);
+        add(scrollPaneLessons, BorderLayout.WEST);
 
-        // Charger les données des leçons
+        // Tableau pour afficher les élèves
+        skierTable = new JTable();
+        JScrollPane scrollPaneSkiers = new JScrollPane(skierTable);
+        add(scrollPaneSkiers, BorderLayout.CENTER);
+
+        // Boutons
+        JPanel buttonPanel = new JPanel();
+        JButton backButton = new JButton("Back");
+        JButton submitButton = new JButton("Submit");
+        buttonPanel.add(backButton);
+        buttonPanel.add(submitButton);
+        add(buttonPanel, BorderLayout.SOUTH);
+
+        // Charger les données des leçons et élèves
         loadLessonData();
-    }
+        loadSkierData();
 
-    private void loadLessonData() {
-        try {
-            // Appel à la méthode getAllLessons
-            List<Lesson> lessons = Lesson.getAllLessons();
+        // Action du bouton Back
+        backButton.addActionListener(e -> {
+            // Remettre à l'écran principal ou le panneau précédent
+            cardLayout.show(mainPanel, "MainScreen"); // Adaptez selon le nom du panel
+        });
 
-            // Vérifier si la liste est vide ou nulle
-            if (lessons == null || lessons.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "No lessons found.", "Information", JOptionPane.INFORMATION_MESSAGE);
+        // Action du bouton Submit
+        submitButton.addActionListener(e -> {
+            // Récupérer les leçons et les skieurs sélectionnés
+            int lessonRow = lessonTable.getSelectedRow();
+            int skierRow = skierTable.getSelectedRow();
+
+            if (lessonRow == -1 || skierRow == -1) {
+                JOptionPane.showMessageDialog(this, "Please select both a lesson and a skier", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            // Configuration des colonnes
+            // Récupérer les objets Lesson et Skier sélectionnés
+            Lesson selectedLesson = lessons.get(lessonRow);
+            Skier selectedSkier = skiers.get(skierRow);
+
+            // Ici, vous pouvez effectuer les actions nécessaires (par exemple, associer le skieur à la leçon)
+            JOptionPane.showMessageDialog(this, "Booking created for " + selectedSkier.getFirstName() + " " + selectedSkier.getLastName() + " for the lesson " + selectedLesson.getLessonType().getName(), "Booking Confirmed", JOptionPane.INFORMATION_MESSAGE);
+        });
+    }
+
+    // Charger les leçons depuis la méthode getAllLessons
+    private void loadLessonData() {
+        try {
+            // Appel à la méthode getAllLessons pour récupérer les leçons
+            lessons = Lesson.getAllLessons();
+
+            // Configuration des colonnes du tableau des leçons
             String[] columnNames = {"Lesson Type", "Instructor", "Start Time", "End Time", "Private"};
             DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
 
             // Ajouter les données au modèle
-            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
             for (Lesson lesson : lessons) {
                 String lessonTypeName = lesson.getLessonType().getName();
                 String instructorName = lesson.getInstructor() != null
                         ? lesson.getInstructor().getFirstName() + " " + lesson.getInstructor().getLastName()
                         : "None";
-                String startTime = dateFormat.format(lesson.getStartDate());
-                String endTime = dateFormat.format(lesson.getEndDate());
+                String startTime = lesson.getStartDate().toString();
+                String endTime = lesson.getEndDate().toString();
                 String isPrivate = lesson.isPrivate() ? "Yes" : "No";
 
                 tableModel.addRow(new Object[]{lessonTypeName, instructorName, startTime, endTime, isPrivate});
@@ -62,10 +100,30 @@ public class CreateBookingPanel extends JPanel {
             lessonTable.setModel(tableModel);
 
         } catch (Exception e) {
-            // Afficher l'exception complète dans la console pour le débogage
-            e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error loading lessons: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
+    // Charger les skieurs depuis la méthode getAllSkiers
+    private void loadSkierData() {
+        try {
+            // Appel à la méthode getAllSkiers pour récupérer les skieurs
+            skiers = Skier.getAllSkiers();
+
+            // Configuration des colonnes du tableau des skieurs
+            String[] columnNames = {"First Name", "Last Name", "City", "Postal Code"};
+            DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
+
+            // Ajouter les données au modèle
+            for (Skier skier : skiers) {
+                tableModel.addRow(new Object[]{skier.getFirstName(), skier.getLastName(), skier.getCity(), skier.getPostalCode()});
+            }
+
+            // Appliquer le modèle au tableau
+            skierTable.setModel(tableModel);
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error loading skiers: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
 }
