@@ -8,6 +8,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -107,9 +108,24 @@ public class CreateBookingPanel extends JPanel {
             String[] columnNames = {"Lesson Type", "Instructor", "Start Date", "End Date"};
             DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
 
+            // Création du formatteur pour la date et l'heure
+            SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
             // Charger les leçons en fonction de l'option privée ou publique
             if (isPrivate) {
                 lessons = Lesson.getAllPrivateLessons();  // Charger les leçons privées
+                for (Lesson lesson : lessons) {
+                    String lessonTypeName = lesson.getLessonType().getName();
+                    String instructorName = lesson.getInstructor() != null
+                            ? lesson.getInstructor().getFirstName() + " " + lesson.getInstructor().getLastName()
+                            : "None";
+
+                    // Formatage de la date et de l'heure pour le début et la fin
+                    String startTime = dateTimeFormat.format(lesson.getStartDate());
+                    String endTime = dateTimeFormat.format(lesson.getEndDate());
+
+                    tableModel.addRow(new Object[]{lessonTypeName, instructorName, startTime, endTime});
+                }
             } else {
                 // Charger les leçons publiques et les regrouper par groupId
                 lessons = Lesson.getAllPublicLessons();
@@ -125,24 +141,12 @@ public class CreateBookingPanel extends JPanel {
                     String instructorName = firstLesson.getInstructor() != null
                             ? firstLesson.getInstructor().getFirstName() + " " + firstLesson.getInstructor().getLastName()
                             : "None";
-                    String startTime = firstLesson.getStartDate().toString();
-                    String endTime = groupLessons.get(groupLessons.size() - 1).getEndDate().toString();  // Dernière leçon du groupe
+
+                    // Formatage de la date et de l'heure pour le début et la fin
+                    String startTime = dateTimeFormat.format(firstLesson.getStartDate());
+                    String endTime = dateTimeFormat.format(groupLessons.get(groupLessons.size() - 1).getEndDate());  // Dernière leçon du groupe
 
                     // Ajouter les données du groupe au tableau
-                    tableModel.addRow(new Object[]{lessonTypeName, instructorName, startTime, endTime});
-                }
-                // Si ce n'est pas un cours public groupé, on n'ajoute rien ici pour les leçons publiques non groupées
-            }
-
-            // Ajouter les leçons privées
-            if (isPrivate) {
-                for (Lesson lesson : lessons) {
-                    String lessonTypeName = lesson.getLessonType().getName();
-                    String instructorName = lesson.getInstructor() != null
-                            ? lesson.getInstructor().getFirstName() + " " + lesson.getInstructor().getLastName()
-                            : "None";
-                    String startTime = lesson.getStartDate().toString();
-                    String endTime = lesson.getEndDate().toString();
                     tableModel.addRow(new Object[]{lessonTypeName, instructorName, startTime, endTime});
                 }
             }
@@ -154,7 +158,6 @@ public class CreateBookingPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Error loading lessons: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-
 
 
 
