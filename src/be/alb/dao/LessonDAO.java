@@ -52,32 +52,53 @@ public class LessonDAO {
 
     // Create a group of lessons
     public static boolean createGroupLessons(List<Lesson> lessons) {
-        String query = "INSERT INTO LESSONS (LESSONID, MINBOOKINGS, MAXBOOKINGS, LESSONTYPEID, INSTRUCTORID, STARTDATE, ENDDATE, ISPRIVATE) "
-                     + "VALUES (Lessons_seq.NEXTVAL, ?, ?, ?, ?, ?, ?, ?)";
+        // Requête avec les nouvelles colonnes
+        String query = "INSERT INTO LESSONS (LESSONID, MINBOOKINGS, MAXBOOKINGS, LESSONTYPEID, INSTRUCTORID, "
+                     + "STARTDATE, ENDDATE, ISPRIVATE, LESSONGROUPID, ISFIRSTDAY, ISLASTDAY) "
+                     + "VALUES (Lessons_seq.NEXTVAL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
         try (Connection connection = OracleDBConnection.getInstance();
              PreparedStatement stmt = connection.prepareStatement(query)) {
 
-            for (Lesson lesson : lessons) {
-                stmt.setInt(1, lesson.getMinBookings());
-                stmt.setInt(2, lesson.getMaxBookings());
-                stmt.setInt(3, lesson.getLessonType().getLessonTypeId());
+            // Variable pour générer le LESSONGROUPID
+            int lessonGroupId = 0;
 
-                // Handle nullable instructor ID
-                if (lesson.getInstructor() != null) {
-                    stmt.setInt(4, lesson.getInstructor().getId());
-                } else {
-                    stmt.setNull(4, Types.INTEGER);
+            for (int i = 0; i < lessons.size(); i++) {
+                Lesson lesson = lessons.get(i);
+
+                // Si c'est la première leçon du groupe, générer un ID de groupe
+                if (i == 0) {
+                    lessonGroupId = getNextGroupId(connection); // Méthode pour obtenir un nouvel ID de groupe
                 }
 
-                stmt.setDate(5, lesson.getStartDate());
-                stmt.setDate(6, lesson.getEndDate());
-                stmt.setInt(7, lesson.isPrivate() ? 1 : 0);
+                // Remplir les paramètres de la requête SQL
+                stmt.setInt(1, lesson.getMinBookings()); // MINBOOKINGS
+                stmt.setInt(2, lesson.getMaxBookings()); // MAXBOOKINGS
+                stmt.setInt(3, lesson.getLessonType().getLessonTypeId()); // LESSONTYPEID
 
+                // Gérer l'ID de l'instructeur qui peut être nul
+                if (lesson.getInstructor() != null) {
+                    stmt.setInt(4, lesson.getInstructor().getId()); // INSTRUCTORID
+                } else {
+                    stmt.setNull(4, Types.INTEGER); // Si instructeur nul
+                }
+
+                stmt.setDate(5, lesson.getStartDate()); // STARTDATE
+                stmt.setDate(6, lesson.getEndDate()); // ENDDATE
+                stmt.setInt(7, lesson.isPrivate() ? 1 : 0); // ISPRIVATE
+
+                stmt.setInt(8, lessonGroupId); // LESSONGROUPID
+
+                // Définir ISFIRSTDAY et ISLASTDAY pour la première et la dernière leçon
+                stmt.setInt(9, (i == 0) ? 1 : 0); // ISFIRSTDAY : 1 pour la première leçon
+                stmt.setInt(10, (i == lessons.size() - 1) ? 1 : 0); // ISLASTDAY : 1 pour la dernière leçon
+
+                // Ajouter à la batch
                 stmt.addBatch();
-                stmt.clearParameters();
+                stmt.clearParameters();  // Nettoyer les paramètres pour la prochaine leçon
             }
 
-            // Execute batch insert
+            // Exécuter la batch
             stmt.executeBatch();
             return true;
         } catch (SQLException e) {
@@ -85,6 +106,19 @@ public class LessonDAO {
             return false;
         }
     }
+    
+    private static int getNextGroupId(Connection connection) throws SQLException {
+        String query = "SELECT LESSONGROUPID_SEQ.NEXTVAL FROM DUAL";  // Supposons que vous avez une séquence LESSONGROUPID_SEQ
+        try (PreparedStatement stmt = connection.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1); // Retourne le prochain ID de groupe
+            } else {
+                throw new SQLException("Failed to get next group ID");
+            }
+        }
+    }
+
     
     public List<Lesson> getAllLessons() throws SQLException {
         List<Lesson> lessons = new ArrayList<>();
