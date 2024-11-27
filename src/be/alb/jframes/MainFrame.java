@@ -62,8 +62,11 @@ public class MainFrame extends JFrame {
     }
 
     private void openCreateBookingPage() {
-        // Ajouter la logique pour gérer les réservations si nécessaire
+        ManageBookingsPanel manageBookingsPanel = new ManageBookingsPanel(cardLayout, mainPanel);
+        mainPanel.add(manageBookingsPanel, "manageBookingsPanel");
+        cardLayout.show(mainPanel, "manageBookingsPanel");
     }
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(MainFrame::new);
