@@ -1,6 +1,7 @@
 package be.alb.models;
 
 import java.sql.Date;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -136,4 +137,15 @@ public class Lesson {
             return LessonDAO.createGroupLessons(groupLessons);
         }
     }
+    
+    public static List<Lesson> getAllLessons() {
+        LessonDAO lessonDAO = new LessonDAO(); 
+        try {
+            return lessonDAO.getAllLessons();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error retrieving lessons: " + e.getMessage(), e);
+        }
+    }
+
+   
 }
