@@ -402,7 +402,7 @@ public class LessonDAO {
     
     public boolean isLessonFull(Lesson lesson) throws SQLException {
         String query = "SELECT COUNT(*) AS bookingCount " +
-                       "FROM Booking b " +
+                       "FROM Bookings b " +
                        "WHERE b.lessonId = ?"; 
 
         try (PreparedStatement stmt = OracleDBConnection.getInstance().prepareStatement(query)) {

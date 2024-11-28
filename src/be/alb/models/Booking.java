@@ -93,7 +93,7 @@ public class Booking {
     public static boolean createPrivateBooking(Skier skier, Lesson lesson, Instructor instructor, Date bookingDate) {
         try {
             // check if we can still book it or it' too late
-            Period period = Period.getPeriodForDate(bookingDate);
+            Period period = Period.getPeriodForDate(lesson.getStartDate());
             if (!isEligibleForBooking(period, bookingDate)) {
                 System.out.println("Booking not eligible: date is out of allowed range.");
                 return false;
@@ -105,7 +105,7 @@ public class Booking {
                 return false;
             }
             
-            if(!Booking.isSkierAlreadyBooked(skier, lesson)) {
+            if(Booking.isSkierAlreadyBooked(skier, lesson)) {
             	System.out.println("Booking not eligible: this skier already has a booking for this class.");
                 return false;
             }
@@ -169,7 +169,7 @@ public class Booking {
             age--;
         }
         
-        String lessonType = lesson.getLessonType().getName(); 
+        String lessonType = lesson.getLessonType().getAgeGroup(); 
 
         if (lessonType.contains("Enfant")) {
             if (age < 4 || age > 12) {

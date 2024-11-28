@@ -12,7 +12,7 @@ public class PeriodDAO {
 	
 	public static Period getPeriodForDate(Date date) throws SQLException {
 	    Period period = null;
-	    String query = "SELECT * FROM Period WHERE ? BETWEEN startDate AND endDate";
+	    String query = "SELECT * FROM Periods WHERE ? BETWEEN startDate AND endDate";
 	    try (PreparedStatement stmt = OracleDBConnection.getInstance().prepareStatement(query)) {
 	        stmt.setDate(1, date);
 	        ResultSet rs = stmt.executeQuery();

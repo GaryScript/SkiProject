@@ -5,13 +5,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import be.alb.database.OracleDBConnection;
+import be.alb.models.Booking;
 import be.alb.models.Lesson;
 import be.alb.models.Skier;
 
 public class BookingDAO {
 	public boolean isSkierAlreadyBooked(Skier skier, Lesson lesson) throws SQLException {
 	    boolean isBooked = false;
-	    String query = "SELECT COUNT(*) FROM Booking WHERE skierId = ? AND lessonId = ?";
+	    String query = "SELECT COUNT(*) FROM Bookings WHERE skierId = ? AND lessonId = ?";
 	    
 	    try (PreparedStatement stmt = OracleDBConnection.getInstance().prepareStatement(query)) {
 	        stmt.setInt(1, skier.getId());
@@ -25,5 +26,26 @@ public class BookingDAO {
 	    
 	    return isBooked;
 	}
+	
+	public static boolean insertPrivateBooking(Booking booking) {
+        String query = "INSERT INTO bookings (lessonid, skierid, instructorid, periodid) VALUES (?, ?, ?, ?)";
+
+        try (PreparedStatement stmt = OracleDBConnection.getInstance().prepareStatement(query)) {
+            stmt.setInt(1, booking.getLesson().getLessonId()); 
+            stmt.setInt(2, booking.getSkier().getId());    
+            stmt.setInt(3, booking.getInstructor().getId());
+            stmt.setInt(4, booking.getPeriod().getPeriodId());  
+
+            int rowsInserted = stmt.executeUpdate();
+            if (rowsInserted > 0) {
+                return true; 
+            } else {
+                return false; 
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false; 
+        }
+    }
 
 }

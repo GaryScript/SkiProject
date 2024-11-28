@@ -1,5 +1,7 @@
 package be.alb.jframes;
 
+import be.alb.models.Booking;
+import be.alb.models.Instructor;
 import be.alb.models.Lesson;
 import be.alb.models.Skier;
 import be.alb.dao.SkierDAO;
@@ -7,6 +9,7 @@ import be.alb.dao.SkierDAO;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.sql.Date;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -78,8 +81,8 @@ public class CreateBookingPanel extends JPanel {
         });
 
         // Action du bouton Submit
+     // Action du bouton Submit
         submitButton.addActionListener(e -> {
-            // Récupérer les leçons et les skieurs sélectionnés
             int lessonRow = lessonTable.getSelectedRow();
             int skierRow = skierTable.getSelectedRow();
 
@@ -88,13 +91,24 @@ public class CreateBookingPanel extends JPanel {
                 return;
             }
 
-            // Récupérer les objets Lesson et Skier sélectionnés
+            
             Lesson selectedLesson = lessons.get(lessonRow);
             Skier selectedSkier = skiers.get(skierRow);
 
-            // Ici, vous pouvez effectuer les actions nécessaires (par exemple, associer le skieur à la leçon)
-            JOptionPane.showMessageDialog(this, "Booking created for " + selectedSkier.getFirstName() + " " + selectedSkier.getLastName() + " for the lesson " + selectedLesson.getLessonType().getName(), "Booking Confirmed", JOptionPane.INFORMATION_MESSAGE);
+            
+            Instructor selectedInstructor = selectedLesson.getInstructor();
+
+            
+            Date bookingDate = new Date(System.currentTimeMillis());  // Date de réservation, ici on utilise la date actuelle
+            boolean bookingSuccess = Booking.createPrivateBooking(selectedSkier, selectedLesson, selectedInstructor, bookingDate);
+
+            if (bookingSuccess) {
+                JOptionPane.showMessageDialog(this, "Booking created for " + selectedSkier.getFirstName() + " " + selectedSkier.getLastName() + " for the lesson " + selectedLesson.getLessonType().getName(), "Booking Confirmed", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Booking creation failed", "Error", JOptionPane.ERROR_MESSAGE);
+            }
         });
+
 
         // Action de changement de sélection de type de leçon
         privateLessonButton.addActionListener(e -> loadLessonData(true)); // Load private lessons
