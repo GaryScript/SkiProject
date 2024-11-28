@@ -91,14 +91,11 @@ public class CreateBookingPanel extends JPanel {
                 return;
             }
 
-            
             Lesson selectedLesson = lessons.get(lessonRow);
             Skier selectedSkier = skiers.get(skierRow);
 
-            
             Instructor selectedInstructor = selectedLesson.getInstructor();
 
-            
             Date bookingDate = new Date(System.currentTimeMillis());  // Date de réservation, ici on utilise la date actuelle
             boolean bookingSuccess = Booking.createPrivateBooking(selectedSkier, selectedLesson, selectedInstructor, bookingDate);
 
@@ -108,6 +105,7 @@ public class CreateBookingPanel extends JPanel {
                 JOptionPane.showMessageDialog(this, "Booking creation failed", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
+
 
 
         // Action de changement de sélection de type de leçon

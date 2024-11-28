@@ -6,6 +6,8 @@ import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.Objects;
 
+import javax.swing.JOptionPane;
+
 import be.alb.dao.BookingDAO;
 import be.alb.dao.LessonDAO;
 
@@ -92,46 +94,48 @@ public class Booking {
     
     public static boolean createPrivateBooking(Skier skier, Lesson lesson, Instructor instructor, Date bookingDate) {
         try {
-            // check if we can still book it or it' too late
+            // check if we can still book it or it's too late
             Period period = Period.getPeriodForDate(lesson.getStartDate());
             if (!isEligibleForBooking(period, bookingDate)) {
-                System.out.println("Booking not eligible: date is out of allowed range.");
+                JOptionPane.showMessageDialog(null, "Booking not eligible: date is out of allowed range.", "Error", JOptionPane.ERROR_MESSAGE);
                 return false;
             }
 
             // check if lesson hasn't already reached max booking
             if (lesson.isLessonFull()) {
-                System.out.println("Booking not eligible: lesson has reached max bookings.");
+                JOptionPane.showMessageDialog(null, "Booking not eligible: lesson has reached max bookings.", "Error", JOptionPane.ERROR_MESSAGE);
                 return false;
             }
-            
-            if(Booking.isSkierAlreadyBooked(skier, lesson)) {
-            	System.out.println("Booking not eligible: this skier already has a booking for this class.");
+
+            if (Booking.isSkierAlreadyBooked(skier, lesson)) {
+                JOptionPane.showMessageDialog(null, "Booking not eligible: this skier already has a booking for this class.", "Error", JOptionPane.ERROR_MESSAGE);
                 return false;
             }
-            
-            if(!Booking.isAgeValidForLesson(skier, lesson)) {
-            	System.out.println("Booking not eligible: this skier is either too young or too old to book this type of lesson.");
+
+            if (!Booking.isAgeValidForLesson(skier, lesson)) {
+                JOptionPane.showMessageDialog(null, "Booking not eligible: this skier is either too young or too old to book this type of lesson.", "Error", JOptionPane.ERROR_MESSAGE);
                 return false;
             }
 
             Booking booking = new Booking(0, skier, lesson, instructor, period);
-            
+
             boolean success = BookingDAO.insertPrivateBooking(booking);
 
             if (success) {
-                System.out.println("Booking successfully created.");
+                JOptionPane.showMessageDialog(null, "Booking successfully created.", "Success", JOptionPane.INFORMATION_MESSAGE);
                 return true;
             } else {
-                System.out.println("Booking creation failed at DAO level.");
+                JOptionPane.showMessageDialog(null, "Booking creation failed at DAO level.", "Error", JOptionPane.ERROR_MESSAGE);
                 return false;
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            e.printStackTrace();  // Log to console
+            JOptionPane.showMessageDialog(null, "An error occurred: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             return false;
         }
     }
+
     
     private static boolean isEligibleForBooking(Period period, Date bookingDate) {
         java.util.Date today = Calendar.getInstance().getTime();
