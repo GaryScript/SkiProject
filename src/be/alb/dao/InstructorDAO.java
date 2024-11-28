@@ -58,7 +58,7 @@ public class InstructorDAO {
 	}
 
     
-	public static int createInstructor(Instructor instructor, List<Integer> accreditationIds) {
+	public static int createInstructor(Instructor instructor) {
         Connection conn = OracleDBConnection.getInstance();
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -94,12 +94,14 @@ public class InstructorDAO {
             int instructorId = -1;
             if (rs.next()) {
                 instructorId = rs.getInt("INSTRUCTORID");
+                instructor.setId(instructorId);
             } else {
                 throw new SQLException("Instructor creation failed, no ID found.");
             }
-
+            
+            
             // add accreditations
-            boolean accreditationSuccess = AccreditationDAO.addAccreditationsToInstructor(conn, instructorId, accreditationIds);
+            boolean accreditationSuccess = Accreditation.addAccreditationsToInstructor(instructor);
             if (!accreditationSuccess) {
                 throw new SQLException("Failed to add accreditations to instructor.");
             }

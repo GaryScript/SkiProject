@@ -1,10 +1,10 @@
 package be.alb.models;
 
 import be.alb.dao.*;
+
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
-
-import be.alb.dao.InstructorDAO;
 
 public class Accreditation {
 	
@@ -41,7 +41,14 @@ public class Accreditation {
     public static List<Accreditation> getAllAccreditations() {
         return AccreditationDAO.getAllAccreditations();
     }
-
+    
+    public static boolean addAccreditationsToInstructor(Instructor instructor)
+    {
+    	AccreditationDAO accreditationDAO = new AccreditationDAO();
+    	return accreditationDAO.addAccreditationsToInstructor(instructor);
+    	
+    }
+    
     // override equals and hashcode so it works when comparing value and not ref
     @Override
     public boolean equals(Object o) {
