@@ -101,17 +101,17 @@ public class CreateInstructorPanel extends JPanel {
         String streetNumber = streetNumberField.getText().trim();
         LocalDate dob = extractDateOnly(dobCalendar.getDate());  // date extraction
 
-        // get the checked accreds
-        List<Integer> selectedAccreditations = new ArrayList<>();
+        // get the checked accreditations
+        List<Accreditation> selectedAccreditations = new ArrayList<>();
         for (int i = 0; i < accreditationCheckBoxes.size(); i++) {
             JCheckBox checkBox = accreditationCheckBoxes.get(i);
             if (checkBox.isSelected()) {
                 Accreditation accreditation = Accreditation.getAllAccreditations().get(i);
-                selectedAccreditations.add(accreditation.getAccreditationID());
+                selectedAccreditations.add(accreditation);
             }
         }
 
-        // create instructor and accreds
+        // create instructor with accreditations
         List<String> result = Instructor.createInstructor(firstName, lastName, city, postalCode, streetName, streetNumber, dob, selectedAccreditations);
 
         if (result.get(0).equals("1")) {
@@ -125,6 +125,7 @@ public class CreateInstructorPanel extends JPanel {
             JOptionPane.showMessageDialog(this, errorMessage.toString(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+
 
 
     // Method to navigate back to the manage instructors panel
