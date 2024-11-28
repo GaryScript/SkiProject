@@ -48,39 +48,41 @@ public class AccreditationDAO {
         return accreditations;  
     }
 	
-	 static boolean addAccreditationsToInstructor(Connection conn, int instructorId, List<Integer> accreditationIds) {
-	        PreparedStatement pstmt = null;
+	public boolean addAccreditationsToInstructor(Instructor instructor) {
+	    PreparedStatement pstmt = null;
+	    Connection conn = OracleDBConnection.getInstance();
+	    
+	    try {
+	        String accreditationQuery = "INSERT INTO InstructorAccreditation (INSTRUCTORACCREDITATIONID, INSTRUCTORID, ACCREDITATIONID) " +
+	                                    "VALUES (INSTRUCTORACCREDITATION_SEQ.NEXTVAL, ?, ?)";
+	        pstmt = conn.prepareStatement(accreditationQuery);
 
-	        try {
-	            String accreditationQuery = "INSERT INTO InstructorAccreditation (INSTRUCTORACCREDITATIONID, INSTRUCTORID, ACCREDITATIONID) " +
-	                                        "VALUES (INSTRUCTORACCREDITATION_SEQ.NEXTVAL, ?, ?)";
-	            pstmt = conn.prepareStatement(accreditationQuery);
+	        for (Accreditation accreditation : instructor.getAccreditations()) {
+	            pstmt.setInt(1, instructor.getId());
+	            pstmt.setInt(2, accreditation.getAccreditationID());
+	            pstmt.addBatch(); 
+	        }
 
-	            for (Integer accreditationId : accreditationIds) {
-	                pstmt.setInt(1, instructorId);
-	                pstmt.setInt(2, accreditationId);
-	                pstmt.addBatch(); 
-	            }
-
-	            int[] updateCounts = pstmt.executeBatch();
-	            // checks if it worked
-	            for (int count : updateCounts) {
-	                if (count == 0) {
-	                    throw new SQLException("Failed to add accreditation to instructor.");
-	                }
-	            }
-
-	            return true; // mean success
-
-	        } catch (SQLException e) {
-	            e.printStackTrace();
-	            return false; // mean an error has occured 
-	        } finally {
-	            try {
-	                if (pstmt != null) pstmt.close();
-	            } catch (SQLException e) {
-	                e.printStackTrace();
+	        int[] updateCounts = pstmt.executeBatch();
+	        for (int count : updateCounts) {
+	            if (count == 0) {
+	                throw new SQLException("Failed to add accreditation to instructor.");
 	            }
 	        }
-    }
+
+	        return true; // Success
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        return false; // Error occurred
+	    } finally {
+	        // Properly close resources
+	        try {
+	            if (pstmt != null) pstmt.close();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
+	}
+
 }

@@ -93,7 +93,7 @@ public class Instructor extends Person {
         return InstructorDAO.getAllInstructors();
     }
     
-    public static List<String> createInstructor(String firstName, String lastName, String city, String postalCode, String streetName, String streetNumber, LocalDate dob, List<Integer> accreditationIds) {
+    public static List<String> createInstructor(String firstName, String lastName, String city, String postalCode, String streetName, String streetNumber, LocalDate dob, List<Accreditation> accreditations) {
         List<String> result = new ArrayList<>();
 
         // validations
@@ -104,7 +104,7 @@ public class Instructor extends Person {
         if (!RegexValidator.isValidStreetName(streetName)) result.add("Nom de rue invalide.");
         if (!RegexValidator.isValidStreetNumber(streetNumber)) result.add("Numéro de rue invalide.");
         if (!RegexValidator.isValidDob(dob)) result.add("Date de naissance invalide. L'instructeur doit avoir au moins 18 ans.");
-        if (accreditationIds == null || accreditationIds.isEmpty()) {
+        if (accreditations == null || accreditations.isEmpty()) {
             result.add("L'instructeur doit avoir au moins une accréditation.");
             return result;
         }
@@ -116,8 +116,8 @@ public class Instructor extends Person {
         }
 
         // bdd add
-        Instructor newInstructor = new Instructor(0, firstName, lastName, city, postalCode, streetName, streetNumber, dob);
-        int newInstructorId = InstructorDAO.createInstructor(newInstructor, accreditationIds);
+        Instructor newInstructor = new Instructor(0, firstName, lastName, city, postalCode, streetName, streetNumber, dob, accreditations);
+        int newInstructorId = InstructorDAO.createInstructor(newInstructor);
 
         if (newInstructorId == -1) {
             result.add(0, "0");
