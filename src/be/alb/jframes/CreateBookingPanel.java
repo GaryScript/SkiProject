@@ -94,17 +94,43 @@ public class CreateBookingPanel extends JPanel {
             Lesson selectedLesson = lessons.get(lessonRow);
             Skier selectedSkier = skiers.get(skierRow);
 
-            Instructor selectedInstructor = selectedLesson.getInstructor();
+            boolean isPrivateLesson = privateLessonButton.isSelected();
+            Date bookingDate = new Date(System.currentTimeMillis()); // Date actuelle
+            boolean bookingSuccess;
 
-            Date bookingDate = new Date(System.currentTimeMillis());  // Date de réservation, ici on utilise la date actuelle
-            boolean bookingSuccess = Booking.createPrivateBooking(selectedSkier, selectedLesson, selectedInstructor, bookingDate);
+            if (isPrivateLesson) {
+                // Booking privé
+                bookingSuccess = Booking.createPrivateBooking(selectedSkier, selectedLesson, bookingDate);
+            } else {
+                // Booking de groupe
+                int selectedGroupId = selectedLesson.getLessonGroupId();
+
+                // Filtrer toutes les leçons du même groupId
+                List<Lesson> groupLessons = lessons.stream()
+                        .filter(lesson -> lesson.getLessonGroupId() == selectedGroupId)
+                        .collect(Collectors.toList());
+
+                if (groupLessons.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "No lessons found for the selected group", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // Envoyer toutes les leçons de groupe à createGroupBookings
+                bookingSuccess = Booking.createGroupBookings(selectedSkier, groupLessons, bookingDate);
+            }
 
             if (bookingSuccess) {
-                JOptionPane.showMessageDialog(this, "Booking created for " + selectedSkier.getFirstName() + " " + selectedSkier.getLastName() + " for the lesson " + selectedLesson.getLessonType().getName(), "Booking Confirmed", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this,
+                    (isPrivateLesson ? "Private booking" : "Group booking") + " created for "
+                    + selectedSkier.getFirstName() + " " + selectedSkier.getLastName() + " for the lesson " 
+                    + selectedLesson.getLessonType().getName(),
+                    "Booking Confirmed", JOptionPane.INFORMATION_MESSAGE);
             } else {
                 JOptionPane.showMessageDialog(this, "Booking creation failed", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
+
+
 
 
 
@@ -117,7 +143,7 @@ public class CreateBookingPanel extends JPanel {
     private void loadLessonData(boolean isPrivate) {
         try {
             // Création du modèle de table
-            String[] columnNames = {"Lesson Type", "Instructor", "Start Date", "End Date"};
+            String[] columnNames = {"Lesson Type", "Instructor", "Start Date", "End Date", "Age group"};
             DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
 
             // Création du formatteur pour la date et l'heure
@@ -135,8 +161,9 @@ public class CreateBookingPanel extends JPanel {
                     // Formatage de la date et de l'heure pour le début et la fin
                     String startTime = dateTimeFormat.format(lesson.getStartDate());
                     String endTime = dateTimeFormat.format(lesson.getEndDate());
+                    String ageGroup = lesson.getLessonType().getAgeGroup();
 
-                    tableModel.addRow(new Object[]{lessonTypeName, instructorName, startTime, endTime});
+                    tableModel.addRow(new Object[]{lessonTypeName, instructorName, startTime, endTime, ageGroup});
                 }
             } else {
                 // Charger les leçons publiques et les regrouper par groupId
@@ -180,12 +207,12 @@ public class CreateBookingPanel extends JPanel {
             skiers = Skier.getAllSkiers();
 
             // Configuration des colonnes du tableau des skieurs
-            String[] columnNames = {"First Name", "Last Name", "City", "Postal Code"};
+            String[] columnNames = {"First Name", "Last Name", "City", "DOB"};
             DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
 
             // Ajouter les données au modèle
             for (Skier skier : skiers) {
-                tableModel.addRow(new Object[]{skier.getFirstName(), skier.getLastName(), skier.getCity(), skier.getPostalCode()});
+                tableModel.addRow(new Object[]{skier.getFirstName(), skier.getLastName(), skier.getCity(), skier.getDob()});
             }
 
             // Appliquer le modèle au tableau

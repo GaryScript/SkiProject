@@ -27,25 +27,27 @@ public class BookingDAO {
 	    return isBooked;
 	}
 	
-	public static boolean insertPrivateBooking(Booking booking) {
-        String query = "INSERT INTO bookings (lessonid, skierid, instructorid, periodid) VALUES (?, ?, ?, ?)";
+	public static boolean insertBooking(Booking booking) {
+	    String query = "INSERT INTO bookings (lessonid, skierid, instructorid, periodid) VALUES (?, ?, ?, ?)";
 
-        try (PreparedStatement stmt = OracleDBConnection.getInstance().prepareStatement(query)) {
-            stmt.setInt(1, booking.getLesson().getLessonId()); 
-            stmt.setInt(2, booking.getSkier().getId());    
-            stmt.setInt(3, booking.getInstructor().getId());
-            stmt.setInt(4, booking.getPeriod().getPeriodId());  
+	    try (PreparedStatement stmt = OracleDBConnection.getInstance().prepareStatement(query)) {
+	        stmt.setInt(1, booking.getLesson().getLessonId());
+	        stmt.setInt(2, booking.getSkier().getId());
+	        stmt.setInt(3, booking.getInstructor().getId());
 
-            int rowsInserted = stmt.executeUpdate();
-            if (rowsInserted > 0) {
-                return true; 
-            } else {
-                return false; 
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false; 
-        }
-    }
+	        if (booking.getPeriod() != null) {
+	            stmt.setInt(4, booking.getPeriod().getPeriodId());
+	        } else {
+	            stmt.setNull(4, java.sql.Types.INTEGER);
+	        }
+
+	        int rowsInserted = stmt.executeUpdate();
+	        return rowsInserted > 0; 
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        return false;
+	    }
+	}
+
 
 }
