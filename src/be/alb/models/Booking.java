@@ -1,6 +1,11 @@
 package be.alb.models;
 
+import java.sql.Date;
+import java.time.LocalDate;
+import java.util.Calendar;
 import java.util.Objects;
+
+import be.alb.dao.LessonDAO;
 
 public class Booking {
 
@@ -82,4 +87,58 @@ public class Booking {
     public int hashCode() {
         return Objects.hash(bookingId);
     }
+    
+    public static boolean createPrivateBooking(Skier skier, Lesson lesson, Instructor instructor, Date bookingDate) {
+        try {
+            // check if we can still book it or it' too late
+            Period period = Period.getPeriodForDate(bookingDate);
+            if (!isEligibleForBooking(period, bookingDate)) {
+                System.out.println("Booking not eligible: date is out of allowed range.");
+                return false;
+            }
+
+            // check if lesson hasn't already reached max booking
+            if (lesson.isLessonFull()) {
+                System.out.println("Booking not eligible: lesson has reached max bookings.");
+                return false;
+            }
+
+            Booking booking = new Booking(0, skier, lesson, instructor, period);
+            
+            boolean success = BookingDAO.insertPrivateBooking(booking);
+
+            if (success) {
+                System.out.println("Booking successfully created.");
+                return true;
+            } else {
+                System.out.println("Booking creation failed at DAO level.");
+                return false;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    private static boolean isEligibleForBooking(Period period, Date bookingDate) {
+        java.util.Date today = Calendar.getInstance().getTime();
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(today);
+
+        if (period.isVacation()) {
+            calendar.add(Calendar.WEEK_OF_YEAR, 1);
+        } else {
+            calendar.add(Calendar.MONTH, 1);
+        }
+
+        java.util.Date limitDate = calendar.getTime();
+
+        return !bookingDate.after(limitDate);
+    }
+
+
+
+
 }

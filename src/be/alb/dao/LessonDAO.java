@@ -399,6 +399,27 @@ public class LessonDAO {
 
         return lessons;
     }
+    
+    public boolean isLessonFull(Lesson lesson) throws SQLException {
+        String query = "SELECT COUNT(*) AS bookingCount " +
+                       "FROM Booking b " +
+                       "WHERE b.lessonId = ?"; 
+
+        try (PreparedStatement stmt = OracleDBConnection.getInstance().prepareStatement(query)) {
+            stmt.setInt(1, lesson.getLessonId());
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    int bookingCount = rs.getInt("bookingCount");
+
+                    return bookingCount >= lesson.getMaxBookings();
+                }
+            }
+        }
+        return false; 
+    }
+
+
 
 
 

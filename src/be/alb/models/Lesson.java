@@ -214,6 +214,15 @@ public class Lesson {
         }
     }
     
+    public boolean isLessonFull() {
+    	LessonDAO lessonDAO = new LessonDAO(); 
+    	try {
+            return lessonDAO.isLessonFull(this);
+        } catch (SQLException e) {
+            throw new RuntimeException("Error retrieving lessons: " + e.getMessage(), e);
+        }
+    }
+    
     
     
 

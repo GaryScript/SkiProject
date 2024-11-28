@@ -1,21 +1,25 @@
 package be.alb.models;
 
+import java.sql.Date;
+import java.sql.SQLException;
 import java.time.LocalDate;
+
+import be.alb.dao.PeriodDAO;
 
 public class Period {
 
     private int periodId; 
-    private LocalDate startDate; 
-    private LocalDate endDate;   
+    private Date startDate; 
+    private Date endDate;   
     private boolean isVacation; 
 
-    public Period(LocalDate startDate, LocalDate endDate, boolean isVacation) {
+    public Period(Date startDate, Date endDate, boolean isVacation) {
         this.startDate = startDate;
         this.endDate = endDate;
         this.isVacation = isVacation;
     }
 
-    public Period(int periodId, LocalDate startDate, LocalDate endDate, boolean isVacation) {
+    public Period(int periodId, Date startDate, Date endDate, boolean isVacation) {
         this.periodId = periodId;
         this.startDate = startDate;
         this.endDate = endDate;
@@ -30,19 +34,19 @@ public class Period {
         this.periodId = periodId;
     }
 
-    public LocalDate getStartDate() {
+    public Date getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(LocalDate startDate) {
+    public void setStartDate(Date startDate) {
         this.startDate = startDate;
     }
 
-    public LocalDate getEndDate() {
+    public Date getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(LocalDate endDate) {
+    public void setEndDate(Date endDate) {
         this.endDate = endDate;
     }
 
@@ -53,5 +57,9 @@ public class Period {
     public void setVacation(boolean vacation) {
         isVacation = vacation;
     }
+    
+    public static Period getPeriodForDate(Date date) throws SQLException {
+        return PeriodDAO.getPeriodForDate(date);
+    }    
 }
 
