@@ -4,9 +4,12 @@ import be.alb.models.Accreditation;
 import be.alb.models.Instructor;
 import be.alb.dao.InstructorDAO;
 
-import com.toedter.calendar.JCalendar;
+
 
 import javax.swing.*;
+
+import com.toedter.calendar.JCalendar;
+
 import java.awt.*;
 import java.sql.Date;
 import java.time.LocalDate;
