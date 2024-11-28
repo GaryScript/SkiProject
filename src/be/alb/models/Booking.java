@@ -1,7 +1,5 @@
 package be.alb.models;
 
-import java.sql.SQLException;
-import java.util.List;
 import java.util.Objects;
 
 public class Booking {
@@ -10,15 +8,27 @@ public class Booking {
     private Skier skier;
     private Lesson lesson;
     private Instructor instructor;
+    private Period period; 
 
+    // constructor for private booking lesson
+    public Booking(int bookingId, Skier skier, Lesson lesson, Instructor instructor, Period period) {
+        this.bookingId = bookingId;
+        this.skier = skier;
+        this.lesson = lesson;
+        this.instructor = instructor;
+        this.period = period;
+    }
+
+    // constructor for grouped booking lesson
     public Booking(int bookingId, Skier skier, Lesson lesson, Instructor instructor) {
         this.bookingId = bookingId;
         this.skier = skier;
         this.lesson = lesson;
         this.instructor = instructor;
+        this.period = null;
     }
 
-    // Getters and setters
+    // Getters et Setters
     public int getBookingId() {
         return bookingId;
     }
@@ -50,19 +60,16 @@ public class Booking {
     public void setInstructor(Instructor instructor) {
         this.instructor = instructor;
     }
-    
-//    public static List<Skier> getAllBookings() {
-//        List<Skier> skiers = null;
-//
-//        try {
-//            skiers = BookingDAO.getAllSkiers();
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//
-//        return skiers;
-//    }
 
+    public Period getPeriod() {
+        return period;
+    }
+
+    public void setPeriod(Period period) {
+        this.period = period;
+    }
+
+    // Override equals and hashCode
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
