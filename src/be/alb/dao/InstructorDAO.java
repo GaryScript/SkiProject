@@ -213,6 +213,30 @@ public class InstructorDAO {
 
 	    return availableInstructors;
 	}
+	
+	public static boolean deleteInstructor(Instructor instructor) {
+        Connection conn = OracleDBConnection.getInstance();
+        PreparedStatement pstmt = null;
+        
+        try {
+            String deleteInstructorQuery = "DELETE FROM instructors WHERE instructorid = ?";
+            pstmt = conn.prepareStatement(deleteInstructorQuery);
+            pstmt.setInt(1, instructor.getId());
+            int rowsAffected = pstmt.executeUpdate();
+            
+            return rowsAffected > 0; 
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (pstmt != null) pstmt.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
 
 
