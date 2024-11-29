@@ -139,4 +139,10 @@ public class Instructor extends Person {
     	
     	return instructors;
     }   
+    
+    public boolean deleteInstructor() {
+        return InstructorDAO.deleteInstructor(this);
+    }
+
+
 }
