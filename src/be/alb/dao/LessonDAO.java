@@ -22,38 +22,33 @@ import javax.swing.JOptionPane;
 
 public class LessonDAO {
 
-    // Create a single lesson
 	public static boolean createLesson(Lesson lesson) {
-	    // SQL query to insert a new lesson
 	    String query = "INSERT INTO LESSONS (LESSONID, MINBOOKINGS, MAXBOOKINGS, LESSONTYPEID, INSTRUCTORID, STARTDATE, ENDDATE, ISPRIVATE) "
 	                 + "VALUES (Lessons_seq.NEXTVAL, ?, ?, ?, ?, ?, ?, ?)";
 
-	    // Try-with-resources to automatically close the resources
 	    try (Connection connection = OracleDBConnection.getInstance();
 	         PreparedStatement stmt = connection.prepareStatement(query)) {
 
 	        // Set parameters for the SQL query
-	        stmt.setInt(1, lesson.getMinBookings());             // MINBOOKINGS
-	        stmt.setInt(2, lesson.getMaxBookings());             // MAXBOOKINGS
-	        stmt.setInt(3, lesson.getLessonType().getLessonTypeId());  // LESSONTYPEID
+	        stmt.setInt(1, lesson.getMinBookings());         
+	        stmt.setInt(2, lesson.getMaxBookings());            
+	        stmt.setInt(3, lesson.getLessonType().getLessonTypeId());  
 
-	        // Handle the instructor ID, which may be null
+	        // might be null
 	        if (lesson.getInstructor() != null) {
-	            stmt.setInt(4, lesson.getInstructor().getId());  // INSTRUCTORID
+	            stmt.setInt(4, lesson.getInstructor().getId());  
 	        } else {
-	            stmt.setNull(4, Types.INTEGER);  // If instructor is null
+	            stmt.setNull(4, Types.INTEGER); 
 	        }
 
-	        stmt.setDate(5, lesson.getStartDate());             // STARTDATE
-	        stmt.setDate(6, lesson.getEndDate());               // ENDDATE
-	        stmt.setInt(7, lesson.isPrivate() ? 1 : 0);        // ISPRIVATE
+	        stmt.setDate(6, lesson.getEndDate());            
+	        stmt.setInt(7, lesson.isPrivate() ? 1 : 0);        
 
-	        // Execute the insert query
 	        int rowsAffected = stmt.executeUpdate();
 
-	        return rowsAffected > 0;  // Return true if at least one row was affected
+	        return rowsAffected > 0;  
 	    } catch (SQLException e) {
-	        e.printStackTrace();  // Log the error
+	        e.printStackTrace();  
 	        return false;
 	    }
 	}
@@ -62,7 +57,6 @@ public class LessonDAO {
 
     // Create a group of lessons
 	public static boolean createGroupLessons(List<Lesson> lessons) {
-        // Requête avec les nouvelles colonnes
         String query = "INSERT INTO LESSONS (LESSONID, MINBOOKINGS, MAXBOOKINGS, LESSONTYPEID, INSTRUCTORID, "
                      + "STARTDATE, ENDDATE, ISPRIVATE, LESSONGROUPID, ISFIRSTDAY, ISLASTDAY) "
                      + "VALUES (Lessons_seq.NEXTVAL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -70,42 +64,39 @@ public class LessonDAO {
         try (Connection connection = OracleDBConnection.getInstance();
              PreparedStatement stmt = connection.prepareStatement(query)) {
 
-            // Variable pour générer le LESSONGROUPID
             int lessonGroupId = 0;
 
             for (int i = 0; i < lessons.size(); i++) {
                 Lesson lesson = lessons.get(i);
 
-                // Si c'est la première leçon du groupe, générer un ID de groupe
+                // if first lesson then generate group id
                 if (i == 0) {
-                    lessonGroupId = getNextGroupId(); // Méthode pour obtenir un nouvel ID de groupe
+                    lessonGroupId = getNextGroupId(); 
                 }
 
-                // Remplir les paramètres de la requête SQL
-                stmt.setInt(1, lesson.getMinBookings()); // MINBOOKINGS
-                stmt.setInt(2, lesson.getMaxBookings()); // MAXBOOKINGS
-                stmt.setInt(3, lesson.getLessonType().getLessonTypeId()); // LESSONTYPEID
+                stmt.setInt(1, lesson.getMinBookings());
+                stmt.setInt(2, lesson.getMaxBookings());
+                stmt.setInt(3, lesson.getLessonType().getLessonTypeId());
 
-                // Gérer l'ID de l'instructeur qui peut être nul
+
                 if (lesson.getInstructor() != null) {
-                    stmt.setInt(4, lesson.getInstructor().getId()); // INSTRUCTORID
+                    stmt.setInt(4, lesson.getInstructor().getId());
                 } else {
-                    stmt.setNull(4, Types.INTEGER); // Si instructeur nul
+                    stmt.setNull(4, Types.INTEGER);
                 }
 
-                stmt.setDate(5, lesson.getStartDate()); // STARTDATE
-                stmt.setDate(6, lesson.getEndDate()); // ENDDATE
-                stmt.setInt(7, lesson.isPrivate() ? 1 : 0); // ISPRIVATE
+                stmt.setDate(5, lesson.getStartDate()); 
+                stmt.setDate(6, lesson.getEndDate()); 
+                stmt.setInt(7, lesson.isPrivate() ? 1 : 0); 
 
-                stmt.setInt(8, lessonGroupId); // LESSONGROUPID
+                stmt.setInt(8, lessonGroupId); 
 
-                // Définir ISFIRSTDAY et ISLASTDAY pour la première et la dernière leçon
-                stmt.setInt(9, (i == 0) ? 1 : 0); // ISFIRSTDAY : 1 pour la première leçon
-                stmt.setInt(10, (i == lessons.size() - 1) ? 1 : 0); // ISLASTDAY : 1 pour la dernière leçon
+                // define if is a first day or no
+                stmt.setInt(9, (i == 0) ? 1 : 0); // ISFIRSTDAY : 1  for first lesson
+                stmt.setInt(10, (i == lessons.size() - 1) ? 1 : 0); // ISLASTDAY : 1 for last lesson
 
-                // Ajouter à la batch
                 stmt.addBatch();
-                stmt.clearParameters();  // Nettoyer les paramètres pour la prochaine leçon
+                stmt.clearParameters();  // clean parameter for next lesson
             }
 
             // Exécuter la batch
@@ -119,11 +110,11 @@ public class LessonDAO {
 
 
 	private static int getNextGroupId() throws SQLException {
-    	String query = "SELECT LESSONGROUPID_SEQ.NEXTVAL FROM DUAL";  // Supposons que vous avez une séquence LESSONGROUPID_SEQ
+    	String query = "SELECT LESSONGROUPID_SEQ.NEXTVAL FROM DUAL";  
         try (PreparedStatement stmt = OracleDBConnection.getInstance().prepareStatement(query);
              ResultSet rs = stmt.executeQuery()) {
             if (rs.next()) {
-                return rs.getInt(1); // Retourne le prochain ID de groupe
+                return rs.getInt(1);
             } else {
                 throw new SQLException("Failed to get next group ID");
             }
@@ -141,7 +132,6 @@ public class LessonDAO {
         try {
             connection = OracleDBConnection.getInstance(); 
 
-            // Étape 1 : Requête principale pour récupérer les leçons
             String query = """
                     SELECT l.LESSONID, l.STARTDATE, l.ENDDATE, l.ISPRIVATE, l.LESSONTYPEID, l.INSTRUCTORID,
                            lt.NAME AS LESSONTYPE_NAME, lt.AGEGROUP, lt.SPORTTYPE, lt.PRICE, lt.ACCREDITATIONID AS LESSONTYPE_ACC_ID,
@@ -157,7 +147,6 @@ public class LessonDAO {
             stmt = connection.prepareStatement(query);
             rs = stmt.executeQuery();
 
-            // Structures temporaires pour gérer les relations
             Map<Integer, Accreditation> accreditationMap = new HashMap<>();
             Map<Integer, LessonType> lessonTypeMap = new HashMap<>();
             Map<Integer, Instructor> instructorMap = new HashMap<>();
@@ -187,19 +176,19 @@ public class LessonDAO {
                 String streetNumber = rs.getString("STREETNUMBER");
                 Date dob = rs.getDate("DOB");
 
-                // Récupérer les informations des accréditations
+                // claim acced info
                 int accreditationId = rs.getInt("INST_ACC_ID");
                 String accreditationName = rs.getString("ACCREDITATION_NAME");
 
-                // Gestion des accréditations
+                // manage accred
                 Accreditation accreditation = accreditationMap.computeIfAbsent(accreditationId, 
                     id -> new Accreditation(id, accreditationName));
 
-                // Gestion des LessonTypes
+                // manage lessontype
                 LessonType lessonType = lessonTypeMap.computeIfAbsent(lessonTypeId, 
                     id -> new LessonType(id, lessonTypeName, ageGroup, sportType, price, accreditation));
 
-                // Gestion des Instructors
+                // manage instructors
                 Instructor instructor = instructorMap.computeIfAbsent(instructorId, id -> {
                     List<Accreditation> accreditations = new ArrayList<>();
                     accreditations.add(accreditation); 
@@ -207,9 +196,7 @@ public class LessonDAO {
                     return new Instructor(id, firstName, lastName, city, postalCode, streetName, streetNumber, 
                                           dobLocalDate, accreditations);
                 });
-
- 
-                // Création de l'objet Lesson
+                
                 Lesson lesson = new Lesson(lessonId, startDate, endDate, instructor, lessonType, isPrivate);
                 lessons.add(lesson);
             }
@@ -219,7 +206,6 @@ public class LessonDAO {
         } finally {
         	  if (rs != null) rs.close();
         	  if (stmt != null) stmt.close();
-            //if (connection != null) connection.close();
         }
 
         return lessons;
@@ -232,7 +218,6 @@ public class LessonDAO {
         ResultSet rs = null;
 
         try {
-            // Requête pour récupérer uniquement les leçons privées
             String query = """
                     SELECT l.LESSONID, l.STARTDATE, l.ENDDATE, l.ISPRIVATE, l.LESSONTYPEID, l.INSTRUCTORID,
                            lt.NAME AS LESSONTYPE_NAME, lt.AGEGROUP, lt.SPORTTYPE, lt.PRICE, lt.ACCREDITATIONID AS LESSONTYPE_ACC_ID,
@@ -249,7 +234,7 @@ public class LessonDAO {
             stmt = connection.prepareStatement(query);
             rs = stmt.executeQuery();
 
-            // Structures temporaires pour gérer les relations
+            // to avoid clones
             Map<Integer, Accreditation> accreditationMap = new HashMap<>();
             Map<Integer, LessonType> lessonTypeMap = new HashMap<>();
             Map<Integer, Instructor> instructorMap = new HashMap<>();
@@ -277,19 +262,19 @@ public class LessonDAO {
                 String streetNumber = rs.getString("STREETNUMBER");
                 Date dob = rs.getDate("DOB");
 
-                // Récupérer les informations des accréditations
+                // claim accred infos
                 int accreditationId = rs.getInt("INST_ACC_ID");
                 String accreditationName = rs.getString("ACCREDITATION_NAME");
 
-                // Gestion des accréditations
+                // manage accréditations
                 Accreditation accreditation = accreditationMap.computeIfAbsent(accreditationId, 
                     id -> new Accreditation(id, accreditationName));
 
-                // Gestion des LessonTypes
+                // manage lessonTypes
                 LessonType lessonType = lessonTypeMap.computeIfAbsent(lessonTypeId, 
                     id -> new LessonType(id, lessonTypeName, ageGroup, sportType, price, accreditation));
 
-                // Gestion des Instructors
+                // manage Instructors
                 Instructor instructor = instructorMap.computeIfAbsent(instructorId, id -> {
                     List<Accreditation> accreditations = new ArrayList<>();
                     accreditations.add(accreditation); 
@@ -298,7 +283,6 @@ public class LessonDAO {
                                           dobLocalDate, accreditations);
                 });
 
-                // Création de l'objet Lesson
                 Lesson lesson = new Lesson(lessonId, startDate, endDate, instructor, lessonType, isPrivate);
                 lessons.add(lesson);
             }
@@ -310,7 +294,6 @@ public class LessonDAO {
             try {
                 if (rs != null) rs.close();
                 if (stmt != null) stmt.close();
-                // Connection is already managed by OracleDBConnection.getInstance() 
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -327,7 +310,6 @@ public class LessonDAO {
         ResultSet rs = null;
 
         try {
-            // Requête pour récupérer uniquement les leçons publiques, incluant le groupId et les flags isFirstDay et isLastDay
             String query = """
                     SELECT l.LESSONID, l.STARTDATE, l.ENDDATE, l.ISPRIVATE, l.LESSONTYPEID, l.INSTRUCTORID,
                            lt.NAME AS LESSONTYPE_NAME, lt.AGEGROUP, lt.SPORTTYPE, lt.PRICE, lt.ACCREDITATIONID AS LESSONTYPE_ACC_ID,
@@ -345,7 +327,6 @@ public class LessonDAO {
             stmt = conn.prepareStatement(query);
             rs = stmt.executeQuery();
 
-            // Structures temporaires pour gérer les relations
             Map<Integer, Accreditation> accreditationMap = new HashMap<>();
             Map<Integer, LessonType> lessonTypeMap = new HashMap<>();
             Map<Integer, Instructor> instructorMap = new HashMap<>();
@@ -373,19 +354,15 @@ public class LessonDAO {
                 String streetNumber = rs.getString("STREETNUMBER");
                 Date dob = rs.getDate("DOB");
 
-                // Récupérer les informations des accréditations
                 int accreditationId = rs.getInt("INST_ACC_ID");
                 String accreditationName = rs.getString("ACCREDITATION_NAME");
 
-                // Gestion des accréditations
                 Accreditation accreditation = accreditationMap.computeIfAbsent(accreditationId, 
                     id -> new Accreditation(id, accreditationName));
 
-                // Gestion des LessonTypes
                 LessonType lessonType = lessonTypeMap.computeIfAbsent(lessonTypeId, 
                     id -> new LessonType(id, lessonTypeName, ageGroup, sportType, price, accreditation));
 
-                // Gestion des Instructors
                 Instructor instructor = instructorMap.computeIfAbsent(instructorId, id -> {
                     List<Accreditation> accreditations = new ArrayList<>();
                     accreditations.add(accreditation);
@@ -394,12 +371,10 @@ public class LessonDAO {
                                           dobLocalDate, accreditations);
                 });
 
-                // Récupérer les nouvelles informations
                 int lessonGroupId = rs.getInt("LESSONGROUPID");
                 boolean isFirstDay = rs.getInt("ISFIRSTDAY") == 1;
                 boolean isLastDay = rs.getInt("ISLASTDAY") == 1;
 
-                // Création de l'objet Lesson avec les nouveaux attributs
                 Lesson lesson = new Lesson(lessonId, startDate, endDate, instructor, lessonType, 
                                            isPrivate, isFirstDay, isLastDay, lessonGroupId);
                 lessons.add(lesson);
@@ -444,24 +419,18 @@ public class LessonDAO {
     public boolean deleteLesson(Lesson lesson) {
         boolean isDeleted = false;
 
-        // Requête SQL pour supprimer la leçon
         String sql = "DELETE FROM LESSONS WHERE LESSONGROUPID = ?";
 
-        // Connexion à la base de données
         Connection conn = OracleDBConnection.getInstance(); 
         PreparedStatement stmt = null;
 
         try {
-            // Préparation de la requête
             stmt = conn.prepareStatement(sql);
 
-            // Affectation des paramètres
             stmt.setInt(1, lesson.getLessonGroupId());
 
-            // Exécution de la requête
             int rowsAffected = stmt.executeUpdate();
 
-            // Si une ligne a été affectée, la suppression est réussie
             if (rowsAffected > 0) {
                 isDeleted = true;
             }
@@ -470,7 +439,6 @@ public class LessonDAO {
             e.printStackTrace();
             JOptionPane.showMessageDialog(null, "Erreur lors de la suppression de la leçon : " + e.getMessage());
         } finally {
-            // Fermeture des ressources
             try {
                 if (stmt != null) {
                     stmt.close();

@@ -197,7 +197,6 @@ public class BookingDAO {
 	        try {
 	            if (rs != null) rs.close();
 	            if (stmt != null) stmt.close();
-	            //if (conn != null) conn.close();  // Fermer la connexion après usage
 	        } catch (SQLException e) {
 	            e.printStackTrace();
 	        }
@@ -209,24 +208,18 @@ public class BookingDAO {
 	public boolean deleteBooking(Booking booking) {
         boolean isDeleted = false;
 
-        // Requête SQL pour supprimer la leçon
         String sql = "DELETE FROM bookings WHERE bookingid = ?";
 
-        // Connexion à la base de données
         Connection conn = OracleDBConnection.getInstance(); 
         PreparedStatement stmt = null;
 
         try {
-            // Préparation de la requête
             stmt = conn.prepareStatement(sql);
 
-            // Affectation des paramètres
             stmt.setInt(1, booking.getBookingId());
 
-            // Exécution de la requête
             int rowsAffected = stmt.executeUpdate();
 
-            // Si une ligne a été affectée, la suppression est réussie
             if (rowsAffected > 0) {
                 isDeleted = true;
             }
@@ -235,7 +228,6 @@ public class BookingDAO {
             e.printStackTrace();
             JOptionPane.showMessageDialog(null, "Erreur lors de la suppression du booking : " + e.getMessage());
         } finally {
-            // Fermeture des ressources
             try {
                 if (stmt != null) {
                     stmt.close();

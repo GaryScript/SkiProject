@@ -15,25 +15,22 @@ public class MainFrame extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // init the cardlayout
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
 
-        // main page with main buttons
-        JPanel menuPanel = new JPanel(new GridLayout(5, 1));  // Augmenté à 5 lignes
+        JPanel menuPanel = new JPanel(new GridLayout(5, 1));
         JButton manageInstructorButton = new JButton("Manage Instructor");
         JButton manageSkierButton = new JButton("Manage Skier");
-        JButton createLessonButton = new JButton("Manage Lessons");  // Changer le texte pour gérer les leçons
+        JButton createLessonButton = new JButton("Manage Lessons"); 
         JButton createBookingButton = new JButton("Create Booking");
 
         manageInstructorButton.addActionListener(e -> openManageInstructorPage());
         manageSkierButton.addActionListener(e -> openManageSkierPage());
-        createLessonButton.addActionListener(e -> openManageLessonsPage());  // Redirige vers ManageLessonsPanel
+        createLessonButton.addActionListener(e -> openManageLessonsPage());
         createBookingButton.addActionListener(e -> {
 			try {
 				openCreateBookingPage();
 			} catch (SQLException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 		});

@@ -23,7 +23,6 @@ public enum LessonTypeEnum {
         return maxBookings;
     }
 
-    // Map the lesson type name to the corresponding enum value
     public static LessonTypeEnum fromLessonTypeName(String lessonTypeName) {
         switch (lessonTypeName) {
             case "Télémark 1-4":

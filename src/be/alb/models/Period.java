@@ -60,6 +60,16 @@ public class Period {
     
     public static Period getPeriodForDate(Date date) throws SQLException {
         return PeriodDAO.getPeriodForDate(date);
-    }    
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+    	return this.toString()==obj.toString() ;
+    }
+    	
+    @Override
+    public int hashCode() {
+    	return toString().hashCode();
+    }
 }
 

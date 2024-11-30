@@ -33,7 +33,7 @@ public class Lesson {
         this.lessonType = lessonType;
         this.isPrivate = isPrivate;
 
-        // Set min and max bookings automatically from LessonTypeEnum based on the lessonType name
+        // set min and max bookings automatically from LessonTypeEnum based on the lessonType name
         try {
             LessonTypeEnum lessonTypeEnum = LessonTypeEnum.fromLessonTypeName(lessonType.getName());
             this.minBookings = lessonTypeEnum.getMinBookings();
@@ -55,7 +55,6 @@ public class Lesson {
 		  this.isLastDay = isLastDay;
 		  this.lessonGroupId = lessonGroupId;
 		
-		  // Set min and max bookings automatically from LessonTypeEnum based on the lessonType name
 		  try {
 		      LessonTypeEnum lessonTypeEnum = LessonTypeEnum.fromLessonTypeName(lessonType.getName());
 		      this.minBookings = lessonTypeEnum.getMinBookings();
@@ -146,7 +145,6 @@ public class Lesson {
         this.lessonGroupId = lessonGroupId;
     }
 
-    // Static method to handle lesson creation
     public static boolean createLesson(Date startDate, Date endDate, Instructor instructor, LessonType lessonType, boolean isPrivate) {
     	if (isPrivate) {
     	    startDate = TimeAdjuster.adjustTimeToSpecificHour(startDate, LessonPeriod.PRIVATE_HOUR_START);
@@ -154,9 +152,9 @@ public class Lesson {
     	    return LessonDAO.createLesson(privateLesson);
     	}
     	else {
-            // Créer des cours collectifs sur 3 jours
+            // create lessongroup over 3 days
             List<Lesson> groupLessons = new ArrayList<>();
-            long oneDay = 24 * 60 * 60 * 1000; // Millisecondes dans un jour
+            long oneDay = 24 * 60 * 60 * 1000; // milliseconds in a day
             Date currentDate = startDate;
 
             for (int i = 0; i < 3; i++) {
@@ -164,7 +162,7 @@ public class Lesson {
                 groupLessons.add(new Lesson(
                     0,
                     TimeAdjuster.adjustTimeToPeriod(currentDate, LessonPeriod.MORNING, true), 
-                    TimeAdjuster.adjustTimeToPeriod(currentDate, LessonPeriod.MORNING, false), // Fin matinée (12h)
+                    TimeAdjuster.adjustTimeToPeriod(currentDate, LessonPeriod.MORNING, false), 
                     instructor,
                     lessonType,
                     false
@@ -172,18 +170,16 @@ public class Lesson {
                 // Session de l'après-midi
                 groupLessons.add(new Lesson(
                     0,
-                    TimeAdjuster.adjustTimeToPeriod(currentDate, LessonPeriod.AFTERNOON, true), // Début après-midi (13h)
-                    TimeAdjuster.adjustTimeToPeriod(currentDate, LessonPeriod.AFTERNOON, false), // Fin après-midi (17h)
+                    TimeAdjuster.adjustTimeToPeriod(currentDate, LessonPeriod.AFTERNOON, true), 
+                    TimeAdjuster.adjustTimeToPeriod(currentDate, LessonPeriod.AFTERNOON, false), 
                     instructor,
                     lessonType,
                     false
                 ));
 
-                // Passer au jour suivant
                 currentDate = new Date(currentDate.getTime() + oneDay);
             }
 
-            // Sauvegarder tous les cours collectifs
             return LessonDAO.createGroupLessons(groupLessons);
         }
     }
@@ -227,6 +223,16 @@ public class Lesson {
     public boolean deleteLesson() {
     	LessonDAO lessonDAO = new LessonDAO(); 
     	return lessonDAO.deleteLesson(this);
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+    	return this.toString()==obj.toString() ;
+    }
+    	
+    @Override
+    public int hashCode() {
+    	return toString().hashCode();
     }
     
     

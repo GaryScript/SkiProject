@@ -55,36 +55,36 @@ public class CreateInstructorPanel extends JPanel {
         }
 
         // Add components to the form
-        formPanel.add(new JLabel("Nom:"));
+        formPanel.add(new JLabel("Lastname:"));
         formPanel.add(lastNameField);
-        formPanel.add(new JLabel("Prénom:"));
+        formPanel.add(new JLabel("Firstname:"));
         formPanel.add(firstNameField);
-        formPanel.add(new JLabel("Ville:"));
+        formPanel.add(new JLabel("City:"));
         formPanel.add(cityField);
-        formPanel.add(new JLabel("Code Postal:"));
+        formPanel.add(new JLabel("Postal code:"));
         formPanel.add(postalCodeField);
-        formPanel.add(new JLabel("Nom de rue:"));
+        formPanel.add(new JLabel("Street name"));
         formPanel.add(streetNameField);
-        formPanel.add(new JLabel("Numéro de rue:"));
+        formPanel.add(new JLabel("Street number:"));
         formPanel.add(streetNumberField);
-        formPanel.add(new JLabel("Date de naissance:"));
+        formPanel.add(new JLabel("DOB:"));
         formPanel.add(dobCalendar);
-        formPanel.add(new JLabel("Accréditations:"));
+        formPanel.add(new JLabel("Accreditations:"));
         formPanel.add(new JScrollPane(accreditationPanel));
 
         // Submit button
-        JButton submitButton = new JButton("Créer l'instructeur");
+        JButton submitButton = new JButton("Create instructor");
         submitButton.addActionListener(e -> createInstructor());
         formPanel.add(submitButton);
 
         // Back button
-        JButton backButton = new JButton("Retour");
+        JButton backButton = new JButton("Go back");
         backButton.addActionListener(e -> cardLayout.show(mainPanel, "manageInstructorsPanel"));
         formPanel.add(backButton);
 
         // Error container
         errorPanel = new JPanel();
-        errorPanel.setLayout(new BoxLayout(errorPanel, BoxLayout.Y_AXIS)); // Stack errors vertically
+        errorPanel.setLayout(new BoxLayout(errorPanel, BoxLayout.Y_AXIS)); 
         errorPanel.setVisible(false); // Hide errors by default
 
         // Add form and error panel to the main layout
@@ -126,36 +126,12 @@ public class CreateInstructorPanel extends JPanel {
         }
     }
 
-
-
-    // Method to navigate back to the manage instructors panel
+    // method to navigate back to the manage instructors panel
     private void goToManageInstructorPanel() {
         ManageInstructorsPanel manageInstructorsPanel = new ManageInstructorsPanel(cardLayout, mainPanel);
         JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
         frame.setContentPane(manageInstructorsPanel);
         frame.revalidate();
-    }
-
-    // Display errors above the relevant form fields
-    private void displayFieldErrors(List<String> errors) {
-        // Hide error panel initially
-        errorPanel.removeAll();
-        errorPanel.setVisible(true);
-
-        // Display errors for each field
-        for (String error : errors) {
-            JLabel errorLabel = new JLabel(error);
-            errorLabel.setForeground(Color.RED);
-            errorLabel.setFont(new Font("Arial", Font.BOLD, 14)); // Increased font size and bold for better visibility
-            errorLabel.setOpaque(true); // Make background visible
-            errorLabel.setBackground(new Color(255, 240, 240)); // Soft red background
-            errorLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5)); // Add padding around error text
-            errorPanel.add(errorLabel);
-        }
-
-        // Revalidate and repaint to ensure errors are displayed correctly
-        errorPanel.revalidate();
-        errorPanel.repaint();
     }
     
     private LocalDate extractDateOnly(java.util.Date date) {

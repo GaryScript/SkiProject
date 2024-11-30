@@ -70,13 +70,12 @@ public class AccreditationDAO {
 	            }
 	        }
 
-	        return true; // Success
+	        return true; 
 
 	    } catch (SQLException e) {
 	        e.printStackTrace();
-	        return false; // Error occurred
+	        return false; 
 	    } finally {
-	        // Properly close resources
 	        try {
 	            if (pstmt != null) pstmt.close();
 	        } catch (SQLException e) {
