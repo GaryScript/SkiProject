@@ -18,107 +18,126 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.JOptionPane;
+
 public class LessonDAO {
 
     // Create a single lesson
-    public static boolean createLesson(Lesson lesson) {
-        String query = "INSERT INTO LESSONS (LESSONID, MINBOOKINGS, MAXBOOKINGS, LESSONTYPEID, INSTRUCTORID, STARTDATE, ENDDATE, ISPRIVATE) "
-                     + "VALUES (Lessons_seq.NEXTVAL, ?, ?, ?, ?, ?, ?, ?)";
-        try (Connection connection = OracleDBConnection.getInstance();
-             PreparedStatement stmt = connection.prepareStatement(query)) {
+	public static boolean createLesson(Lesson lesson) {
+	    // SQL query to insert a new lesson
+	    String query = "INSERT INTO LESSONS (LESSONID, MINBOOKINGS, MAXBOOKINGS, LESSONTYPEID, INSTRUCTORID, STARTDATE, ENDDATE, ISPRIVATE) "
+	                 + "VALUES (Lessons_seq.NEXTVAL, ?, ?, ?, ?, ?, ?, ?)";
 
-            // Set parameters for the prepared statement
-            stmt.setInt(1, lesson.getMinBookings());
-            stmt.setInt(2, lesson.getMaxBookings());
-            stmt.setInt(3, lesson.getLessonType().getLessonTypeId());
-            
-            // Handle nullable instructor ID
-            if (lesson.getInstructor() != null) {
-                stmt.setInt(4, lesson.getInstructor().getId());
-            } else {
-                stmt.setNull(4, Types.INTEGER);
-            }
-            
-            stmt.setDate(5, lesson.getStartDate());
-            stmt.setDate(6, lesson.getEndDate());
-            stmt.setInt(7, lesson.isPrivate() ? 1 : 0);
+	    // Try-with-resources to automatically close the resources
+	    try (Connection connection = OracleDBConnection.getInstance();
+	         PreparedStatement stmt = connection.prepareStatement(query)) {
 
-            return stmt.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
+	        // Set parameters for the SQL query
+	        stmt.setInt(1, lesson.getMinBookings());             // MINBOOKINGS
+	        stmt.setInt(2, lesson.getMaxBookings());             // MAXBOOKINGS
+	        stmt.setInt(3, lesson.getLessonType().getLessonTypeId());  // LESSONTYPEID
+
+	        // Handle the instructor ID, which may be null
+	        if (lesson.getInstructor() != null) {
+	            stmt.setInt(4, lesson.getInstructor().getId());  // INSTRUCTORID
+	        } else {
+	            stmt.setNull(4, Types.INTEGER);  // If instructor is null
+	        }
+
+	        stmt.setDate(5, lesson.getStartDate());             // STARTDATE
+	        stmt.setDate(6, lesson.getEndDate());               // ENDDATE
+	        stmt.setInt(7, lesson.isPrivate() ? 1 : 0);        // ISPRIVATE
+
+	        // Execute the insert query
+	        int rowsAffected = stmt.executeUpdate();
+
+	        return rowsAffected > 0;  // Return true if at least one row was affected
+	    } catch (SQLException e) {
+	        e.printStackTrace();  // Log the error
+	        return false;
+	    }
+	}
+
+
 
     // Create a group of lessons
-    public static boolean createGroupLessons(List<Lesson> lessons) {
-        // Requête avec les nouvelles colonnes
-        String query = "INSERT INTO LESSONS (LESSONID, MINBOOKINGS, MAXBOOKINGS, LESSONTYPEID, INSTRUCTORID, "
-                     + "STARTDATE, ENDDATE, ISPRIVATE, LESSONGROUPID, ISFIRSTDAY, ISLASTDAY) "
-                     + "VALUES (Lessons_seq.NEXTVAL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	public static boolean createGroupLessons(List<Lesson> lessons) {
+	    // SQL query to insert a group of lessons
+	    String query = "INSERT INTO LESSONS (LESSONID, MINBOOKINGS, MAXBOOKINGS, LESSONTYPEID, INSTRUCTORID, "
+	                 + "STARTDATE, ENDDATE, ISPRIVATE, LESSONGROUPID, ISFIRSTDAY, ISLASTDAY) "
+	                 + "VALUES (Lessons_seq.NEXTVAL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (Connection connection = OracleDBConnection.getInstance();
-             PreparedStatement stmt = connection.prepareStatement(query)) {
+	    // Try-with-resources to automatically close the resources
+	    try (Connection connection = OracleDBConnection.getInstance();
+	         PreparedStatement stmt = connection.prepareStatement(query)) {
 
-            // Variable pour générer le LESSONGROUPID
-            int lessonGroupId = 0;
+	        // Variable to handle the lesson group ID
+	        int lessonGroupId = 0;
 
-            for (int i = 0; i < lessons.size(); i++) {
-                Lesson lesson = lessons.get(i);
+	        // Loop through the list of lessons and prepare the batch
+	        for (int i = 0; i < lessons.size(); i++) {
+	            Lesson lesson = lessons.get(i);
 
-                // Si c'est la première leçon du groupe, générer un ID de groupe
-                if (i == 0) {
-                    lessonGroupId = getNextGroupId(); // Méthode pour obtenir un nouvel ID de groupe
-                }
+	            // If it's the first lesson in the group, generate a new group ID
+	            if (i == 0) {
+	                lessonGroupId = getNextGroupId();  // Get the next group ID
+	            }
 
-                // Remplir les paramètres de la requête SQL
-                stmt.setInt(1, lesson.getMinBookings()); // MINBOOKINGS
-                stmt.setInt(2, lesson.getMaxBookings()); // MAXBOOKINGS
-                stmt.setInt(3, lesson.getLessonType().getLessonTypeId()); // LESSONTYPEID
+	            // Set parameters for the SQL query
+	            stmt.setInt(1, lesson.getMinBookings());           // MINBOOKINGS
+	            stmt.setInt(2, lesson.getMaxBookings());           // MAXBOOKINGS
+	            stmt.setInt(3, lesson.getLessonType().getLessonTypeId());  // LESSONTYPEID
 
-                // Gérer l'ID de l'instructeur qui peut être nul
-                if (lesson.getInstructor() != null) {
-                    stmt.setInt(4, lesson.getInstructor().getId()); // INSTRUCTORID
-                } else {
-                    stmt.setNull(4, Types.INTEGER); // Si instructeur nul
-                }
+	            // Handle the instructor ID, which may be null
+	            if (lesson.getInstructor() != null) {
+	                stmt.setInt(4, lesson.getInstructor().getId());  // INSTRUCTORID
+	            } else {
+	                stmt.setNull(4, Types.INTEGER);  // If instructor is null
+	            }
 
-                stmt.setDate(5, lesson.getStartDate()); // STARTDATE
-                stmt.setDate(6, lesson.getEndDate()); // ENDDATE
-                stmt.setInt(7, lesson.isPrivate() ? 1 : 0); // ISPRIVATE
+	            stmt.setDate(5, lesson.getStartDate());             // STARTDATE
+	            stmt.setDate(6, lesson.getEndDate());               // ENDDATE
+	            stmt.setInt(7, lesson.isPrivate() ? 1 : 0);        // ISPRIVATE
+	            stmt.setInt(8, lessonGroupId);                     // LESSONGROUPID
 
-                stmt.setInt(8, lessonGroupId); // LESSONGROUPID
+	            // Set ISFIRSTDAY and ISLASTDAY for the first and last lesson in the group
+	            stmt.setInt(9, (i == 0) ? 1 : 0);  // ISFIRSTDAY: 1 for the first lesson
+	            stmt.setInt(10, (i == lessons.size() - 1) ? 1 : 0);  // ISLASTDAY: 1 for the last lesson
 
-                // Définir ISFIRSTDAY et ISLASTDAY pour la première et la dernière leçon
-                stmt.setInt(9, (i == 0) ? 1 : 0); // ISFIRSTDAY : 1 pour la première leçon
-                stmt.setInt(10, (i == lessons.size() - 1) ? 1 : 0); // ISLASTDAY : 1 pour la dernière leçon
+	            // Add the current lesson's parameters to the batch
+	            stmt.addBatch();
+	            stmt.clearParameters();  // Clear parameters for the next lesson
+	        }
 
-                // Ajouter à la batch
-                stmt.addBatch();
-                stmt.clearParameters();  // Nettoyer les paramètres pour la prochaine leçon
-            }
+	        // Execute the batch insert
+	        stmt.executeBatch();
+	        return true;  // Return true if the batch was executed successfully
+	    } catch (SQLException e) {
+	        e.printStackTrace();  // Log the error
+	        return false;
+	    }
+	}
 
-            // Exécuter la batch
-            stmt.executeBatch();
-            return true;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
+
     
     private static int getNextGroupId() throws SQLException {
-        Connection connection = OracleDBConnection.getInstance();
-    	String query = "SELECT LESSONGROUPID_SEQ.NEXTVAL FROM DUAL";  // Supposons que vous avez une séquence LESSONGROUPID_SEQ
-        try (PreparedStatement stmt = OracleDBConnection.getInstance().prepareStatement(query);
+        String query = "SELECT LESSONGROUPID_SEQ.NEXTVAL FROM DUAL";  // Assuming the sequence LESSONGROUPID_SEQ exists
+
+        try (Connection connection = OracleDBConnection.getInstance();  // Using try-with-resources to automatically close the connection
+             PreparedStatement stmt = connection.prepareStatement(query);
              ResultSet rs = stmt.executeQuery()) {
+            
             if (rs.next()) {
-                return rs.getInt(1); // Retourne le prochain ID de groupe
+                return rs.getInt(1);  // Return the next group ID
             } else {
                 throw new SQLException("Failed to get next group ID");
             }
+        } catch (SQLException e) {
+            e.printStackTrace();  // Log the error
+            throw e;  // Rethrow the exception to be handled by the calling method
         }
     }
+
 
     
     public List<Lesson> getAllLessons() throws SQLException {
@@ -242,7 +261,6 @@ public class LessonDAO {
             Map<Integer, Accreditation> accreditationMap = new HashMap<>();
             Map<Integer, LessonType> lessonTypeMap = new HashMap<>();
             Map<Integer, Instructor> instructorMap = new HashMap<>();
-            Map<Integer, List<Accreditation>> instructorAccreditationsMap = new HashMap<>();
 
             while (rs.next()) {
                 int lessonId = rs.getInt("LESSONID");
@@ -293,14 +311,22 @@ public class LessonDAO {
                 lessons.add(lesson);
             }
 
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw e;
         } finally {
-            if (rs != null) rs.close();
-            if (stmt != null) stmt.close();
-            //if (connection != null) connection.close();
+            try {
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+                // Connection is already managed by OracleDBConnection.getInstance() 
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
 
         return lessons;
     }
+
     
     public List<Lesson> getAllPublicLessons() throws SQLException {
         List<Lesson> lessons = new ArrayList<>();
@@ -387,14 +413,22 @@ public class LessonDAO {
                 lessons.add(lesson);
             }
 
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw e;
         } finally {
-            if (rs != null) rs.close();
-            if (stmt != null) stmt.close();
-            // Connexion déjà gérée par OracleDBConnection.getInstance() 
+            try {
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+                // Connection is already managed by OracleDBConnection.getInstance() 
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
 
         return lessons;
     }
+
 
     
     public boolean isLessonFull(Lesson lesson) throws SQLException {
@@ -417,19 +451,45 @@ public class LessonDAO {
     }
     
     public boolean deleteLesson(Lesson lesson) {
-        String sql = "DELETE FROM LESSONS WHERE LESSONID = ?";
-        try (Connection conn = OracleDBConnection.getInstance();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        boolean isDeleted = false;
 
-            stmt.setInt(1, lesson.getLessonId());
+        // Requête SQL pour supprimer la leçon
+        String sql = "DELETE FROM LESSONS WHERE LESSONGROUPID = ?";
 
+        // Connexion à la base de données
+        Connection conn = OracleDBConnection.getInstance(); 
+        PreparedStatement stmt = null;
+
+        try {
+            // Préparation de la requête
+            stmt = conn.prepareStatement(sql);
+
+            // Affectation des paramètres
+            stmt.setInt(1, lesson.getLessonGroupId());
+
+            // Exécution de la requête
             int rowsAffected = stmt.executeUpdate();
 
-            return rowsAffected > 0;
-        } catch (Exception e) {
+            // Si une ligne a été affectée, la suppression est réussie
+            if (rowsAffected > 0) {
+                isDeleted = true;
+            }
+
+        } catch (SQLException e) {
             e.printStackTrace();
-            return false;
+            JOptionPane.showMessageDialog(null, "Erreur lors de la suppression de la leçon : " + e.getMessage());
+        } finally {
+            // Fermeture des ressources
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
+
+        return isDeleted;
     }
 
 

@@ -202,11 +202,6 @@ public class Booking {
         }
     }
 
-
-
-
-
-    
     private static boolean isEligibleForBooking(Period period, Date bookingDate) {
         java.util.Date today = Calendar.getInstance().getTime();
 

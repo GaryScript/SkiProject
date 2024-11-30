@@ -2,6 +2,7 @@ package be.alb.jframes;
 
 import javax.swing.*;
 import java.awt.*;
+import java.sql.SQLException;
 
 public class MainFrame extends JFrame {
 
@@ -28,7 +29,14 @@ public class MainFrame extends JFrame {
         manageInstructorButton.addActionListener(e -> openManageInstructorPage());
         manageSkierButton.addActionListener(e -> openManageSkierPage());
         createLessonButton.addActionListener(e -> openManageLessonsPage());  // Redirige vers ManageLessonsPanel
-        createBookingButton.addActionListener(e -> openCreateBookingPage());
+        createBookingButton.addActionListener(e -> {
+			try {
+				openCreateBookingPage();
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		});
 
         menuPanel.add(manageInstructorButton);
         menuPanel.add(manageSkierButton);
@@ -61,7 +69,7 @@ public class MainFrame extends JFrame {
         cardLayout.show(mainPanel, "manageLessonsPanel");
     }
 
-    private void openCreateBookingPage() {
+    private void openCreateBookingPage() throws SQLException {
         ManageBookingsPanel manageBookingsPanel = new ManageBookingsPanel(cardLayout, mainPanel);
         mainPanel.add(manageBookingsPanel, "manageBookingsPanel");
         cardLayout.show(mainPanel, "manageBookingsPanel");
