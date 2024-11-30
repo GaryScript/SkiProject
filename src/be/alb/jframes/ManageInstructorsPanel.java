@@ -80,7 +80,7 @@ public class ManageInstructorsPanel extends JPanel {
 
         // Bouton pour revenir au menu principal
         JButton backButton = new JButton("Retour au menu principal");
-        backButton.addActionListener(e -> cardLayout.show(mainPanel, "mainPanel"));
+        backButton.addActionListener(e -> cardLayout.show(mainPanel, "menuPanel"));
         buttonPanel.add(backButton);
 
         add(buttonPanel, BorderLayout.NORTH);
