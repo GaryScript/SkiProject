@@ -18,40 +18,50 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.JOptionPane;
+
 public class LessonDAO {
 
     // Create a single lesson
-    public static boolean createLesson(Lesson lesson) {
-        String query = "INSERT INTO LESSONS (LESSONID, MINBOOKINGS, MAXBOOKINGS, LESSONTYPEID, INSTRUCTORID, STARTDATE, ENDDATE, ISPRIVATE) "
-                     + "VALUES (Lessons_seq.NEXTVAL, ?, ?, ?, ?, ?, ?, ?)";
-        try (Connection connection = OracleDBConnection.getInstance();
-             PreparedStatement stmt = connection.prepareStatement(query)) {
+	public static boolean createLesson(Lesson lesson) {
+	    // SQL query to insert a new lesson
+	    String query = "INSERT INTO LESSONS (LESSONID, MINBOOKINGS, MAXBOOKINGS, LESSONTYPEID, INSTRUCTORID, STARTDATE, ENDDATE, ISPRIVATE) "
+	                 + "VALUES (Lessons_seq.NEXTVAL, ?, ?, ?, ?, ?, ?, ?)";
 
-            // Set parameters for the prepared statement
-            stmt.setInt(1, lesson.getMinBookings());
-            stmt.setInt(2, lesson.getMaxBookings());
-            stmt.setInt(3, lesson.getLessonType().getLessonTypeId());
-            
-            // Handle nullable instructor ID
-            if (lesson.getInstructor() != null) {
-                stmt.setInt(4, lesson.getInstructor().getId());
-            } else {
-                stmt.setNull(4, Types.INTEGER);
-            }
-            
-            stmt.setDate(5, lesson.getStartDate());
-            stmt.setDate(6, lesson.getEndDate());
-            stmt.setInt(7, lesson.isPrivate() ? 1 : 0);
+	    // Try-with-resources to automatically close the resources
+	    try (Connection connection = OracleDBConnection.getInstance();
+	         PreparedStatement stmt = connection.prepareStatement(query)) {
 
-            return stmt.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
+	        // Set parameters for the SQL query
+	        stmt.setInt(1, lesson.getMinBookings());             // MINBOOKINGS
+	        stmt.setInt(2, lesson.getMaxBookings());             // MAXBOOKINGS
+	        stmt.setInt(3, lesson.getLessonType().getLessonTypeId());  // LESSONTYPEID
+
+	        // Handle the instructor ID, which may be null
+	        if (lesson.getInstructor() != null) {
+	            stmt.setInt(4, lesson.getInstructor().getId());  // INSTRUCTORID
+	        } else {
+	            stmt.setNull(4, Types.INTEGER);  // If instructor is null
+	        }
+
+	        stmt.setDate(5, lesson.getStartDate());             // STARTDATE
+	        stmt.setDate(6, lesson.getEndDate());               // ENDDATE
+	        stmt.setInt(7, lesson.isPrivate() ? 1 : 0);        // ISPRIVATE
+
+	        // Execute the insert query
+	        int rowsAffected = stmt.executeUpdate();
+
+	        return rowsAffected > 0;  // Return true if at least one row was affected
+	    } catch (SQLException e) {
+	        e.printStackTrace();  // Log the error
+	        return false;
+	    }
+	}
+
+
 
     // Create a group of lessons
-    public static boolean createGroupLessons(List<Lesson> lessons) {
+	public static boolean createGroupLessons(List<Lesson> lessons) {
         // Requête avec les nouvelles colonnes
         String query = "INSERT INTO LESSONS (LESSONID, MINBOOKINGS, MAXBOOKINGS, LESSONTYPEID, INSTRUCTORID, "
                      + "STARTDATE, ENDDATE, ISPRIVATE, LESSONGROUPID, ISFIRSTDAY, ISLASTDAY) "
@@ -106,9 +116,9 @@ public class LessonDAO {
             return false;
         }
     }
-    
-    private static int getNextGroupId() throws SQLException {
-        Connection connection = OracleDBConnection.getInstance();
+
+
+	private static int getNextGroupId() throws SQLException {
     	String query = "SELECT LESSONGROUPID_SEQ.NEXTVAL FROM DUAL";  // Supposons que vous avez une séquence LESSONGROUPID_SEQ
         try (PreparedStatement stmt = OracleDBConnection.getInstance().prepareStatement(query);
              ResultSet rs = stmt.executeQuery()) {
@@ -118,7 +128,8 @@ public class LessonDAO {
                 throw new SQLException("Failed to get next group ID");
             }
         }
-    }
+    } 
+
 
     
     public List<Lesson> getAllLessons() throws SQLException {
@@ -206,8 +217,8 @@ public class LessonDAO {
 
 
         } finally {
-//            if (rs != null) rs.close();
-//            if (stmt != null) stmt.close();
+        	  if (rs != null) rs.close();
+        	  if (stmt != null) stmt.close();
             //if (connection != null) connection.close();
         }
 
@@ -242,7 +253,6 @@ public class LessonDAO {
             Map<Integer, Accreditation> accreditationMap = new HashMap<>();
             Map<Integer, LessonType> lessonTypeMap = new HashMap<>();
             Map<Integer, Instructor> instructorMap = new HashMap<>();
-            Map<Integer, List<Accreditation>> instructorAccreditationsMap = new HashMap<>();
 
             while (rs.next()) {
                 int lessonId = rs.getInt("LESSONID");
@@ -293,14 +303,22 @@ public class LessonDAO {
                 lessons.add(lesson);
             }
 
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw e;
         } finally {
-            if (rs != null) rs.close();
-            if (stmt != null) stmt.close();
-            //if (connection != null) connection.close();
+            try {
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+                // Connection is already managed by OracleDBConnection.getInstance() 
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
 
         return lessons;
     }
+
     
     public List<Lesson> getAllPublicLessons() throws SQLException {
         List<Lesson> lessons = new ArrayList<>();
@@ -387,14 +405,21 @@ public class LessonDAO {
                 lessons.add(lesson);
             }
 
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw e;
         } finally {
-            if (rs != null) rs.close();
-            if (stmt != null) stmt.close();
-            // Connexion déjà gérée par OracleDBConnection.getInstance() 
+            try {
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
 
         return lessons;
     }
+
 
     
     public boolean isLessonFull(Lesson lesson) throws SQLException {
@@ -417,19 +442,45 @@ public class LessonDAO {
     }
     
     public boolean deleteLesson(Lesson lesson) {
-        String sql = "DELETE FROM LESSONS WHERE LESSONID = ?";
-        try (Connection conn = OracleDBConnection.getInstance();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        boolean isDeleted = false;
 
-            stmt.setInt(1, lesson.getLessonId());
+        // Requête SQL pour supprimer la leçon
+        String sql = "DELETE FROM LESSONS WHERE LESSONGROUPID = ?";
 
+        // Connexion à la base de données
+        Connection conn = OracleDBConnection.getInstance(); 
+        PreparedStatement stmt = null;
+
+        try {
+            // Préparation de la requête
+            stmt = conn.prepareStatement(sql);
+
+            // Affectation des paramètres
+            stmt.setInt(1, lesson.getLessonGroupId());
+
+            // Exécution de la requête
             int rowsAffected = stmt.executeUpdate();
 
-            return rowsAffected > 0;
-        } catch (Exception e) {
+            // Si une ligne a été affectée, la suppression est réussie
+            if (rowsAffected > 0) {
+                isDeleted = true;
+            }
+
+        } catch (SQLException e) {
             e.printStackTrace();
-            return false;
+            JOptionPane.showMessageDialog(null, "Erreur lors de la suppression de la leçon : " + e.getMessage());
+        } finally {
+            // Fermeture des ressources
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
+
+        return isDeleted;
     }
 
 

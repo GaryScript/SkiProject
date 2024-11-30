@@ -77,7 +77,7 @@ public class CreateBookingPanel extends JPanel {
         // Action du bouton Back
         backButton.addActionListener(e -> {
        
-            cardLayout.show(mainPanel, "MainScreen");
+            cardLayout.show(mainPanel, "manageBookingsPanel");
         });
 
         // Action du bouton Submit

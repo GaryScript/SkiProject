@@ -11,6 +11,7 @@ import javax.swing.JOptionPane;
 
 import be.alb.dao.BookingDAO;
 import be.alb.dao.LessonDAO;
+import be.alb.dao.SkierDAO;
 
 public class Booking {
 
@@ -201,11 +202,6 @@ public class Booking {
         }
     }
 
-
-
-
-
-    
     private static boolean isEligibleForBooking(Period period, Date bookingDate) {
         java.util.Date today = Calendar.getInstance().getTime();
 
@@ -258,6 +254,16 @@ public class Booking {
         }
         
         return true;
+    }
+    
+    public static List<Booking> getAllBookings() throws SQLException {
+        List<Booking> bookings = null;
+        
+        BookingDAO bookingDAO = new BookingDAO();
+
+        bookings = bookingDAO.getAllBookings();
+
+        return bookings;
     }
     
     
