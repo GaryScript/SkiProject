@@ -59,7 +59,7 @@ public class ManageBookingsPanel extends JPanel {
                 if (confirmation == JOptionPane.YES_OPTION) {
                     selectedBooking.deleteBooking();
                     JOptionPane.showMessageDialog(this, "Booking deleted successfully.");
-                    refreshBookings();
+                    //refreshBookings();
                 }
             }
         });
@@ -86,10 +86,10 @@ public class ManageBookingsPanel extends JPanel {
 
     private JPanel createBookingsTablePanel(List<Booking> bookings) {
         JPanel panel = new JPanel(new BorderLayout());
-        String[] columnNames = {"Booking ID", "Lesson Type", "Instructor", "Skier", "Start Date", "End Date"};
+        String[] columnNames = {"Booking ID", "Lesson Type", "Instructor", "Skier", "Start Date", "End Date", "Price"};
 
         DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); 
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         bookings.forEach(booking -> {
             tableModel.addRow(new Object[]{
                     booking.getBookingId(),
@@ -97,7 +97,8 @@ public class ManageBookingsPanel extends JPanel {
                     booking.getInstructor().getFirstName(),
                     booking.getSkier().getFirstName(),
                     dateFormat.format(booking.getLesson().getStartDate()),
-                    dateFormat.format(booking.getLesson().getEndDate())  
+                    dateFormat.format(booking.getLesson().getEndDate()),
+                    booking.calculatePrice()
             });
         });
 
@@ -111,7 +112,7 @@ public class ManageBookingsPanel extends JPanel {
                 int selectedRow = table.getSelectedRow();
                 if (selectedRow != -1) {
                     selectedBooking = bookings.get(selectedRow);
-                    deleteBookingButton.setEnabled(true); 
+                    deleteBookingButton.setEnabled(true);
                 }
             }
         });
@@ -121,10 +122,10 @@ public class ManageBookingsPanel extends JPanel {
 
     private JPanel createGroupedBookingsTablePanel(Map<Integer, List<Booking>> groupedBookings) {
         JPanel panel = new JPanel(new BorderLayout());
-        String[] columnNames = {"Lesson Type", "Instructor", "Start Date", "End Date"};
+        String[] columnNames = {"Lesson Type", "Instructor", "Start Date", "End Date", "Price"};
 
         DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); 
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
         groupedBookings.forEach((groupId, bookings) -> {
             String lessonType = bookings.get(0).getLesson().getLessonType().getName();
@@ -137,8 +138,9 @@ public class ManageBookingsPanel extends JPanel {
                     .map(booking -> booking.getLesson().getEndDate())
                     .max(java.util.Date::compareTo)
                     .orElse(null));
+            double totalPrice = bookings.stream().mapToDouble(Booking::calculatePrice).sum();
 
-            tableModel.addRow(new Object[]{lessonType, instructorName, startDate, endDate});
+            tableModel.addRow(new Object[]{lessonType, instructorName, startDate, endDate, totalPrice});
         });
 
         JTable table = new JTable(tableModel);
@@ -148,14 +150,4 @@ public class ManageBookingsPanel extends JPanel {
         return panel;
     }
 
-    private void refreshBookings() {
-        try {
-            List<Booking> allBookings = Booking.getAllBookings();
-            List<Booking> publicBookings = getPublicBookings(allBookings);
-            Map<Integer, List<Booking>> privateBookings = getPrivateBookings(allBookings);
-            // todo
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 }
