@@ -1,6 +1,7 @@
 package be.alb.jframes;
 
 import be.alb.models.Instructor;
+import be.alb.models.Accreditation;
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
@@ -26,7 +27,7 @@ public class ManageInstructorsPanel extends JPanel {
             return;
         }
 
-        String[] columnNames = {"ID", "Nom", "Prénom", "Ville"};
+        String[] columnNames = {"ID", "Nom", "Prénom", "Ville", "Accréditations"};
         Object[][] data = new Object[instructors.size()][columnNames.length];
 
         for (int i = 0; i < instructors.size(); i++) {
@@ -35,6 +36,16 @@ public class ManageInstructorsPanel extends JPanel {
             data[i][1] = instructor.getLastName();
             data[i][2] = instructor.getFirstName();
             data[i][3] = instructor.getCity();
+
+            // Récupérer les accréditations et les afficher sous forme de chaîne
+            StringBuilder accreditations = new StringBuilder();
+            for (Accreditation accreditation : instructor.getAccreditations()) {
+                if (accreditations.length() > 0) {
+                    accreditations.append(", ");
+                }
+                accreditations.append(accreditation.getName());
+            }
+            data[i][4] = accreditations.toString();  // Afficher les accréditations dans la colonne
         }
 
         table = new JTable(data, columnNames);
@@ -69,7 +80,7 @@ public class ManageInstructorsPanel extends JPanel {
 
         // Bouton pour revenir au menu principal
         JButton backButton = new JButton("Retour au menu principal");
-        backButton.addActionListener(e -> cardLayout.show(mainPanel, "menuPanel"));
+        backButton.addActionListener(e -> cardLayout.show(mainPanel, "mainPanel"));
         buttonPanel.add(backButton);
 
         add(buttonPanel, BorderLayout.NORTH);
@@ -105,7 +116,7 @@ public class ManageInstructorsPanel extends JPanel {
     // Méthode pour rafraîchir l'affichage du tableau
     private void refreshTable() {
         // Vider et réinitialiser le tableau avec la nouvelle liste d'instructeurs
-        String[] columnNames = {"ID", "Nom", "Prénom", "Ville"};
+        String[] columnNames = {"ID", "Nom", "Prénom", "Ville", "Accréditations"};
         Object[][] data = new Object[instructors.size()][columnNames.length];
 
         for (int i = 0; i < instructors.size(); i++) {
@@ -114,6 +125,16 @@ public class ManageInstructorsPanel extends JPanel {
             data[i][1] = instructor.getLastName();
             data[i][2] = instructor.getFirstName();
             data[i][3] = instructor.getCity();
+
+            // Récupérer les accréditations et les afficher sous forme de chaîne
+            StringBuilder accreditations = new StringBuilder();
+            for (Accreditation accreditation : instructor.getAccreditations()) {
+                if (accreditations.length() > 0) {
+                    accreditations.append(", ");
+                }
+                accreditations.append(accreditation.getName());
+            }
+            data[i][4] = accreditations.toString();  // Afficher les accréditations dans la colonne
         }
 
         table.setModel(new javax.swing.table.DefaultTableModel(data, columnNames)); // Mettre à jour le modèle de la table

@@ -118,4 +118,6 @@ public class Skier extends Person {
 		}
     	return false;
     }
+    
+
 }
