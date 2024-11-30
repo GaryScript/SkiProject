@@ -62,81 +62,73 @@ public class LessonDAO {
 
     // Create a group of lessons
 	public static boolean createGroupLessons(List<Lesson> lessons) {
-	    // SQL query to insert a group of lessons
-	    String query = "INSERT INTO LESSONS (LESSONID, MINBOOKINGS, MAXBOOKINGS, LESSONTYPEID, INSTRUCTORID, "
-	                 + "STARTDATE, ENDDATE, ISPRIVATE, LESSONGROUPID, ISFIRSTDAY, ISLASTDAY) "
-	                 + "VALUES (Lessons_seq.NEXTVAL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        // Requête avec les nouvelles colonnes
+        String query = "INSERT INTO LESSONS (LESSONID, MINBOOKINGS, MAXBOOKINGS, LESSONTYPEID, INSTRUCTORID, "
+                     + "STARTDATE, ENDDATE, ISPRIVATE, LESSONGROUPID, ISFIRSTDAY, ISLASTDAY) "
+                     + "VALUES (Lessons_seq.NEXTVAL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-	    // Try-with-resources to automatically close the resources
-	    try (Connection connection = OracleDBConnection.getInstance();
-	         PreparedStatement stmt = connection.prepareStatement(query)) {
+        try (Connection connection = OracleDBConnection.getInstance();
+             PreparedStatement stmt = connection.prepareStatement(query)) {
 
-	        // Variable to handle the lesson group ID
-	        int lessonGroupId = 0;
+            // Variable pour générer le LESSONGROUPID
+            int lessonGroupId = 0;
 
-	        // Loop through the list of lessons and prepare the batch
-	        for (int i = 0; i < lessons.size(); i++) {
-	            Lesson lesson = lessons.get(i);
+            for (int i = 0; i < lessons.size(); i++) {
+                Lesson lesson = lessons.get(i);
 
-	            // If it's the first lesson in the group, generate a new group ID
-	            if (i == 0) {
-	                lessonGroupId = getNextGroupId();  // Get the next group ID
-	            }
+                // Si c'est la première leçon du groupe, générer un ID de groupe
+                if (i == 0) {
+                    lessonGroupId = getNextGroupId(); // Méthode pour obtenir un nouvel ID de groupe
+                }
 
-	            // Set parameters for the SQL query
-	            stmt.setInt(1, lesson.getMinBookings());           // MINBOOKINGS
-	            stmt.setInt(2, lesson.getMaxBookings());           // MAXBOOKINGS
-	            stmt.setInt(3, lesson.getLessonType().getLessonTypeId());  // LESSONTYPEID
+                // Remplir les paramètres de la requête SQL
+                stmt.setInt(1, lesson.getMinBookings()); // MINBOOKINGS
+                stmt.setInt(2, lesson.getMaxBookings()); // MAXBOOKINGS
+                stmt.setInt(3, lesson.getLessonType().getLessonTypeId()); // LESSONTYPEID
 
-	            // Handle the instructor ID, which may be null
-	            if (lesson.getInstructor() != null) {
-	                stmt.setInt(4, lesson.getInstructor().getId());  // INSTRUCTORID
-	            } else {
-	                stmt.setNull(4, Types.INTEGER);  // If instructor is null
-	            }
+                // Gérer l'ID de l'instructeur qui peut être nul
+                if (lesson.getInstructor() != null) {
+                    stmt.setInt(4, lesson.getInstructor().getId()); // INSTRUCTORID
+                } else {
+                    stmt.setNull(4, Types.INTEGER); // Si instructeur nul
+                }
 
-	            stmt.setDate(5, lesson.getStartDate());             // STARTDATE
-	            stmt.setDate(6, lesson.getEndDate());               // ENDDATE
-	            stmt.setInt(7, lesson.isPrivate() ? 1 : 0);        // ISPRIVATE
-	            stmt.setInt(8, lessonGroupId);                     // LESSONGROUPID
+                stmt.setDate(5, lesson.getStartDate()); // STARTDATE
+                stmt.setDate(6, lesson.getEndDate()); // ENDDATE
+                stmt.setInt(7, lesson.isPrivate() ? 1 : 0); // ISPRIVATE
 
-	            // Set ISFIRSTDAY and ISLASTDAY for the first and last lesson in the group
-	            stmt.setInt(9, (i == 0) ? 1 : 0);  // ISFIRSTDAY: 1 for the first lesson
-	            stmt.setInt(10, (i == lessons.size() - 1) ? 1 : 0);  // ISLASTDAY: 1 for the last lesson
+                stmt.setInt(8, lessonGroupId); // LESSONGROUPID
 
-	            // Add the current lesson's parameters to the batch
-	            stmt.addBatch();
-	            stmt.clearParameters();  // Clear parameters for the next lesson
-	        }
+                // Définir ISFIRSTDAY et ISLASTDAY pour la première et la dernière leçon
+                stmt.setInt(9, (i == 0) ? 1 : 0); // ISFIRSTDAY : 1 pour la première leçon
+                stmt.setInt(10, (i == lessons.size() - 1) ? 1 : 0); // ISLASTDAY : 1 pour la dernière leçon
 
-	        // Execute the batch insert
-	        stmt.executeBatch();
-	        return true;  // Return true if the batch was executed successfully
-	    } catch (SQLException e) {
-	        e.printStackTrace();  // Log the error
-	        return false;
-	    }
-	}
+                // Ajouter à la batch
+                stmt.addBatch();
+                stmt.clearParameters();  // Nettoyer les paramètres pour la prochaine leçon
+            }
+
+            // Exécuter la batch
+            stmt.executeBatch();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
 
-    
-    private static int getNextGroupId() throws SQLException {
-        String query = "SELECT LESSONGROUPID_SEQ.NEXTVAL FROM DUAL";  // Assuming the sequence LESSONGROUPID_SEQ exists
-
-        try (Connection connection = OracleDBConnection.getInstance();  // Using try-with-resources to automatically close the connection
-             PreparedStatement stmt = connection.prepareStatement(query);
+	private static int getNextGroupId() throws SQLException {
+    	String query = "SELECT LESSONGROUPID_SEQ.NEXTVAL FROM DUAL";  // Supposons que vous avez une séquence LESSONGROUPID_SEQ
+        try (PreparedStatement stmt = OracleDBConnection.getInstance().prepareStatement(query);
              ResultSet rs = stmt.executeQuery()) {
-            
             if (rs.next()) {
-                return rs.getInt(1);  // Return the next group ID
+                return rs.getInt(1); // Retourne le prochain ID de groupe
             } else {
                 throw new SQLException("Failed to get next group ID");
             }
-        } catch (SQLException e) {
-            e.printStackTrace();  // Log the error
-            throw e;  // Rethrow the exception to be handled by the calling method
         }
-    }
+    } 
 
 
     
@@ -225,8 +217,8 @@ public class LessonDAO {
 
 
         } finally {
-//            if (rs != null) rs.close();
-//            if (stmt != null) stmt.close();
+        	  if (rs != null) rs.close();
+        	  if (stmt != null) stmt.close();
             //if (connection != null) connection.close();
         }
 
@@ -420,7 +412,6 @@ public class LessonDAO {
             try {
                 if (rs != null) rs.close();
                 if (stmt != null) stmt.close();
-                // Connection is already managed by OracleDBConnection.getInstance() 
             } catch (SQLException e) {
                 e.printStackTrace();
             }
