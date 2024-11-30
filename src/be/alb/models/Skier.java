@@ -24,7 +24,6 @@ public class Skier extends Person {
         return hasInsurance;
     }
 
-    // Setter pour hasInsurance (si nécessaire)
     public void setHasInsurance(boolean hasInsurance) {
         this.hasInsurance = hasInsurance;
     }
@@ -86,10 +85,8 @@ public class Skier extends Person {
             return result;
         }
 
-        // La variable hasInsurance est déjà un Boolean, donc on n'a pas besoin de la convertir
         Boolean skierHasInsurance = hasInsurance;
 
-        // bdd add
         Skier newSkier = new Skier(0, firstName, lastName, city, postalCode, streetName, streetNumber, dob, skierHasInsurance);
         int newSkierId = -1;
         try {

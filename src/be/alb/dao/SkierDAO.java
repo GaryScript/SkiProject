@@ -29,7 +29,7 @@ public class SkierDAO implements SkierDAOInterface {
                     rs.getString("streetname"),
                     rs.getString("streetnumber"),
                     rs.getDate("dob").toLocalDate(),
-                    rs.getInt("hasInsurance") == 1 // Conversion de int (1 ou 0) en boolean
+                    rs.getInt("hasInsurance") == 1 // conversion of boolean 
                 );
                 skiers.add(skier);
             }
@@ -53,7 +53,7 @@ public class SkierDAO implements SkierDAOInterface {
                         rs.getString("streetname"),
                         rs.getString("streetnumber"),
                         rs.getDate("dob").toLocalDate(),
-                        rs.getInt("hasInsurance") == 1 // Conversion de int (1 ou 0) en boolean
+                        rs.getInt("hasInsurance") == 1 // same
                     );
                 }
             }
@@ -75,7 +75,7 @@ public class SkierDAO implements SkierDAOInterface {
             pstmt.setString(5, skier.getStreetName());
             pstmt.setString(6, skier.getStreetNumber());
             pstmt.setDate(7, Date.valueOf(skier.getDob()));
-            pstmt.setInt(8, skier.getHasInsurance() ? 1 : 0); // Conversion de boolean en int (1 ou 0)
+            pstmt.setInt(8, skier.getHasInsurance() ? 1 : 0);
 
             int affectedRows = pstmt.executeUpdate();
             if (affectedRows == 0) {
@@ -103,7 +103,7 @@ public class SkierDAO implements SkierDAOInterface {
             pstmt.setString(5, skier.getStreetName());
             pstmt.setString(6, skier.getStreetNumber());
             pstmt.setDate(7, Date.valueOf(skier.getDob()));
-            pstmt.setInt(8, skier.getHasInsurance() ? 1 : 0); // Conversion de boolean en int (1 ou 0)
+            pstmt.setInt(8, skier.getHasInsurance() ? 1 : 0); 
             pstmt.setInt(9, skier.getId());
 
             int affectedRows = pstmt.executeUpdate();

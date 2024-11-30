@@ -19,7 +19,6 @@ public class ManageInstructorsPanel extends JPanel {
 
         setLayout(new BorderLayout());
 
-        // Charger les instructeurs à partir de la base de données
         loadInstructors();
 
         if (instructors == null || instructors.isEmpty()) {
@@ -37,7 +36,6 @@ public class ManageInstructorsPanel extends JPanel {
             data[i][2] = instructor.getFirstName();
             data[i][3] = instructor.getCity();
 
-            // Récupérer les accréditations et les afficher sous forme de chaîne
             StringBuilder accreditations = new StringBuilder();
             for (Accreditation accreditation : instructor.getAccreditations()) {
                 if (accreditations.length() > 0) {
@@ -45,7 +43,7 @@ public class ManageInstructorsPanel extends JPanel {
                 }
                 accreditations.append(accreditation.getName());
             }
-            data[i][4] = accreditations.toString();  // Afficher les accréditations dans la colonne
+            data[i][4] = accreditations.toString(); 
         }
 
         table = new JTable(data, columnNames);
@@ -53,7 +51,6 @@ public class ManageInstructorsPanel extends JPanel {
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
-        // Bouton pour créer un instructeur
         JButton createButton = new JButton("Créer un nouvel instructeur");
         createButton.addActionListener(e -> {
             CreateInstructorPanel createInstructorPanel = new CreateInstructorPanel(cardLayout, mainPanel);
@@ -62,15 +59,15 @@ public class ManageInstructorsPanel extends JPanel {
         });
         buttonPanel.add(createButton);
 
-        // Bouton pour supprimer un instructeur
+ 
         JButton deleteButton = new JButton("Supprimer un instructeur");
         deleteButton.addActionListener(e -> {
             int selectedRow = table.getSelectedRow();
             if (selectedRow != -1) {
-                int instructorId = (int) table.getValueAt(selectedRow, 0); // Récupérer l'ID de l'instructeur sélectionné
-                Instructor instructor = getInstructorById(instructorId); // Récupérer l'objet Instructor
+                int instructorId = (int) table.getValueAt(selectedRow, 0); 
+                Instructor instructor = getInstructorById(instructorId); 
                 if (instructor != null) {
-                    deleteInstructor(instructor); // Supprimer l'instructeur
+                    deleteInstructor(instructor); 
                 }
             } else {
                 JOptionPane.showMessageDialog(this, "Veuillez sélectionner un instructeur à supprimer.", "Erreur", JOptionPane.ERROR_MESSAGE);
@@ -78,7 +75,6 @@ public class ManageInstructorsPanel extends JPanel {
         });
         buttonPanel.add(deleteButton);
 
-        // Bouton pour revenir au menu principal
         JButton backButton = new JButton("Retour au menu principal");
         backButton.addActionListener(e -> cardLayout.show(mainPanel, "menuPanel"));
         buttonPanel.add(backButton);
@@ -86,12 +82,10 @@ public class ManageInstructorsPanel extends JPanel {
         add(buttonPanel, BorderLayout.NORTH);
     }
 
-    // Méthode pour charger les instructeurs depuis la base de données
     private void loadInstructors() {
         this.instructors = Instructor.getAllInstructors();
     }
 
-    // Méthode pour récupérer un instructeur par son ID
     private Instructor getInstructorById(int id) {
         for (Instructor instructor : instructors) {
             if (instructor.getId() == id) {
@@ -101,21 +95,17 @@ public class ManageInstructorsPanel extends JPanel {
         return null;
     }
 
-    // Méthode pour supprimer un instructeur et mettre à jour la liste
     public void deleteInstructor(Instructor instructor) {
         if (instructor.deleteInstructor()) {
-            // Si la suppression réussit, mettre à jour la liste
-            instructors.remove(instructor); // Supprime l'instructeur de la liste
+            instructors.remove(instructor);
             JOptionPane.showMessageDialog(this, "Instructor deleted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
-            refreshTable(); // Rafraîchit le tableau
+            refreshTable(); 
         } else {
             JOptionPane.showMessageDialog(this, "Failed to delete instructor.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    // Méthode pour rafraîchir l'affichage du tableau
     private void refreshTable() {
-        // Vider et réinitialiser le tableau avec la nouvelle liste d'instructeurs
         String[] columnNames = {"ID", "Nom", "Prénom", "Ville", "Accréditations"};
         Object[][] data = new Object[instructors.size()][columnNames.length];
 
@@ -126,7 +116,6 @@ public class ManageInstructorsPanel extends JPanel {
             data[i][2] = instructor.getFirstName();
             data[i][3] = instructor.getCity();
 
-            // Récupérer les accréditations et les afficher sous forme de chaîne
             StringBuilder accreditations = new StringBuilder();
             for (Accreditation accreditation : instructor.getAccreditations()) {
                 if (accreditations.length() > 0) {
@@ -134,11 +123,11 @@ public class ManageInstructorsPanel extends JPanel {
                 }
                 accreditations.append(accreditation.getName());
             }
-            data[i][4] = accreditations.toString();  // Afficher les accréditations dans la colonne
+            data[i][4] = accreditations.toString(); 
         }
 
-        table.setModel(new javax.swing.table.DefaultTableModel(data, columnNames)); // Mettre à jour le modèle de la table
-        revalidate(); // Rafraîchit le layout
-        repaint(); // Redessine le panneau
+        table.setModel(new javax.swing.table.DefaultTableModel(data, columnNames)); 
+        revalidate(); 
+        repaint(); 
     }
 }

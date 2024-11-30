@@ -24,7 +24,6 @@ public class InstructorDAO {
 	    ResultSet rs = null;
 
 	    try {
-	        // Modifie la requête pour inclure les accréditations
 	        String query = "SELECT i.INSTRUCTORID, i.FIRSTNAME, i.LASTNAME, i.CITY, i.POSTALCODE, i.STREETNAME, i.STREETNUMBER, i.DOB, " +
 	                       "a.ACCREDITATIONID, a.NAME AS ACCREDITATION_NAME " +
 	                       "FROM INSTRUCTORS i " +
@@ -34,7 +33,7 @@ public class InstructorDAO {
 	        stmt = conn.createStatement();
 	        rs = stmt.executeQuery(query);
 
-	        // Utilise une map pour éviter les doublons d'instructeurs (car un instructeur peut avoir plusieurs accréditations)
+	        // Using map to avoid clone
 	        Map<Integer, Instructor> instructorMap = new HashMap<>();
 
 	        while (rs.next()) {
@@ -48,14 +47,13 @@ public class InstructorDAO {
 	            Date dob = rs.getDate("DOB");
 	            LocalDate localDob = (dob != null) ? dob.toLocalDate() : null;
 
-	            // Si l'instructeur n'est pas déjà dans la map, on l'ajoute
+	            // if instructor not alrady in map -> we add him
 	            Instructor instructor = instructorMap.get(id);
 	            if (instructor == null) {
 	                instructor = new Instructor(id, name, firstName, city, postalCode, streetName, streetNumber, localDob, new ArrayList<>());
 	                instructorMap.put(id, instructor);
 	            }
 
-	            // Récupère l'accréditation et l'ajoute à la liste des accréditations de l'instructeur
 	            int accreditationId = rs.getInt("ACCREDITATIONID");
 	            if (accreditationId > 0) {
 	                String accreditationName = rs.getString("ACCREDITATION_NAME");
@@ -63,8 +61,7 @@ public class InstructorDAO {
 	                instructor.getAccreditations().add(accreditation);
 	            }
 	        }
-
-	        // Ajoute tous les instructeurs de la map à la liste
+	        
 	        instructors.addAll(instructorMap.values());
 
 	    } catch (SQLException e) {
@@ -123,8 +120,7 @@ public class InstructorDAO {
             } else {
                 throw new SQLException("Instructor creation failed, no ID found.");
             }
-            
-            
+           
             // add accreditations
             boolean accreditationSuccess = Accreditation.addAccreditationsToInstructor(instructor);
             if (!accreditationSuccess) {
@@ -177,10 +173,10 @@ public class InstructorDAO {
 	                 "AND a.ACCREDITATIONID = lt.ACCREDITATIONID ";
 
 	    if (isPrivateLesson) {
-	        // Leçon privée: l'instructeur doit être libre à la startDate
+	        // private lesson -> just need to be freed at 12 this day
 	        sql += "AND (l.STARTDATE IS NULL OR l.STARTDATE != ?) ";
 	    } else {
-	        // Leçon collective: vérifier les chevauchements des dates
+	        // check if not chevauching lesson
 	        sql += "AND (l.STARTDATE IS NULL OR " +
 	               "(l.ENDDATE <= ? OR l.STARTDATE >= ? OR " +
 	               "(l.STARTDATE < ? AND l.ENDDATE > ?))) ";
@@ -191,15 +187,14 @@ public class InstructorDAO {
 	    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
 	        stmt.setInt(1, lessonTypeId);
 
-	        // Si c'est une leçon privée, vérifier la seule startDate
 	        if (isPrivateLesson) {
 	            stmt.setDate(2, new java.sql.Date(startDate.getTime()));
 	        } else {
-	            // Leçon collective: vérifier les deux dates (startDate et endDate)
-	            stmt.setDate(2, new java.sql.Date(endDate.getTime())); // Date de fin
-	            stmt.setDate(3, new java.sql.Date(startDate.getTime())); // Date de début
-	            stmt.setDate(4, new java.sql.Date(startDate.getTime())); // Date de début de la leçon à vérifier
-	            stmt.setDate(5, new java.sql.Date(endDate.getTime()));   // Date de fin de la leçon à vérifier
+	            // check both date
+	            stmt.setDate(2, new java.sql.Date(endDate.getTime())); 
+	            stmt.setDate(3, new java.sql.Date(startDate.getTime())); 
+	            stmt.setDate(4, new java.sql.Date(startDate.getTime())); 
+	            stmt.setDate(5, new java.sql.Date(endDate.getTime()));  
 	        }
 
 	        try (ResultSet rs = stmt.executeQuery()) {

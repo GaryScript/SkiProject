@@ -11,9 +11,8 @@ public class LessonType {
     private String ageGroup;
     private String sportType;
     private double price;
-    private Accreditation accreditation; // Référence à l'objet Accreditation
+    private Accreditation accreditation;
 
-    // Constructeur
     public LessonType(int lessonTypeId, String name, String ageGroup, String sportType, double price, Accreditation accreditation) {
         this.lessonTypeId = lessonTypeId;
         this.name = name;
@@ -23,7 +22,6 @@ public class LessonType {
         this.accreditation = accreditation;
     }
 
-    // Getters et Setters
     public int getLessonTypeId() {
         return lessonTypeId;
     }
@@ -72,7 +70,6 @@ public class LessonType {
         this.accreditation = accreditation;
     }
 
-    // Méthode pour récupérer l'ID de l'accréditation via l'objet Accreditation
     public int getAccreditationId() {
         return accreditation != null ? accreditation.getAccreditationID() : 0;
     }
@@ -80,10 +77,20 @@ public class LessonType {
     public static List<LessonType> getAllLessonTypes() {
         LessonTypeDAO lessonTypeDAO = new LessonTypeDAO();
         try {
-            return lessonTypeDAO.getAllLessonTypes(); // Appel à la méthode du DAO
+            return lessonTypeDAO.getAllLessonTypes();
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
         }
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+    	return this.toString()==obj.toString() ;
+    }
+    	
+    @Override
+    public int hashCode() {
+    	return toString().hashCode();
     }
 }

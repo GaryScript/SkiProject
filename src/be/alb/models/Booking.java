@@ -80,54 +80,44 @@ public class Booking {
         this.period = period;
     }
 
-    // Override equals and hashCode
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        Booking booking = (Booking) obj;
-        return bookingId == booking.bookingId;
+    	return this.toString()==obj.toString() ;
     }
-
+    	
     @Override
     public int hashCode() {
-        return Objects.hash(bookingId);
+    	return toString().hashCode();
     }
     
     public static boolean createPrivateBooking(Skier skier, Lesson lesson, Date bookingDate) {
         try {
-            // Récupération de l'instructeur à partir de la leçon
             Instructor instructor = lesson.getInstructor();
 
-            // Vérifier si la réservation est encore possible
+            // check if available
             Period period = Period.getPeriodForDate(lesson.getStartDate());
             if (!isEligibleForBooking(period, bookingDate)) {
                 JOptionPane.showMessageDialog(null, "Booking not eligible: date is out of allowed range.", "Error", JOptionPane.ERROR_MESSAGE);
                 return false;
             }
 
-            // Vérifier si le cours n'a pas atteint le maximum d'inscriptions
             if (lesson.isLessonFull()) {
                 JOptionPane.showMessageDialog(null, "Booking not eligible: lesson has reached max bookings.", "Error", JOptionPane.ERROR_MESSAGE);
                 return false;
             }
 
-            // Vérifier si le skieur est déjà inscrit au cours
             if (Booking.isSkierAlreadyBooked(skier, lesson)) {
                 JOptionPane.showMessageDialog(null, "Booking not eligible: this skier already has a booking for this class.", "Error", JOptionPane.ERROR_MESSAGE);
                 return false;
             }
 
-            // Vérifier si l'âge du skieur est valide pour ce type de cours
             if (!Booking.isAgeValidForLesson(skier, lesson)) {
                 JOptionPane.showMessageDialog(null, "Booking not eligible: this skier is either too young or too old to book this type of lesson.", "Error", JOptionPane.ERROR_MESSAGE);
                 return false;
             }
 
-            // Créer l'objet Booking
             Booking booking = new Booking(0, skier, lesson, instructor, period);
 
-            // Insérer la réservation dans la base de données
             boolean success = BookingDAO.insertBooking(booking);
 
             if (success) {
@@ -138,7 +128,7 @@ public class Booking {
                 return false;
             }
         } catch (Exception e) {
-            e.printStackTrace();  // Log de l'erreur
+            e.printStackTrace(); 
             JOptionPane.showMessageDialog(null, "An error occurred: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             return false;
         }
@@ -154,10 +144,8 @@ public class Booking {
 
             Lesson firstLesson = lessons.get(0);
 
-            // Récupération de l'instructeur à partir de la première leçon
             Instructor instructor = firstLesson.getInstructor();
 
-            // Vérifier si la première leçon n'a pas atteint le maximum d'inscriptions
             if (firstLesson.isLessonFull()) {
                 JOptionPane.showMessageDialog(null,
                     "Booking not eligible: lesson '" + firstLesson.getLessonType().getName() + "' has reached max bookings.",
@@ -165,7 +153,6 @@ public class Booking {
                 return false;
             }
 
-            // Vérifier si le skieur est déjà inscrit à la première leçon
             if (Booking.isSkierAlreadyBooked(skier, firstLesson)) {
                 JOptionPane.showMessageDialog(null,
                     "Booking not eligible: this skier already has a booking for lesson '" + firstLesson.getLessonType().getName() + "'.",
@@ -173,7 +160,6 @@ public class Booking {
                 return false;
             }
 
-            // Vérifier si l'âge du skieur est valide pour la première leçon
             if (!Booking.isAgeValidForLesson(skier, firstLesson)) {
                 JOptionPane.showMessageDialog(null,
                     "Booking not eligible: skier is not eligible for lesson '" + firstLesson.getLessonType().getName() + "' due to age restrictions.",
@@ -181,7 +167,6 @@ public class Booking {
                 return false;
             }
 
-            // Créer et insérer les réservations pour chaque leçon dans le groupe
             for (Lesson lesson : lessons) {
                 Booking booking = new Booking(0, skier, lesson, instructor, null);
                 boolean success = BookingDAO.insertBooking(booking);
@@ -196,7 +181,7 @@ public class Booking {
             JOptionPane.showMessageDialog(null, "All bookings successfully processed.", "Success", JOptionPane.INFORMATION_MESSAGE);
             return true;
         } catch (Exception e) {
-            e.printStackTrace();  // Log de l'erreur
+            e.printStackTrace(); 
             JOptionPane.showMessageDialog(null, "An error occurred: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             return false;
         }

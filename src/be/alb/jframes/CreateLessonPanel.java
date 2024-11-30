@@ -98,7 +98,7 @@ public class CreateLessonPanel extends JPanel {
     }
     
     private void loadInstructors() {
-        // Récupérer le type de leçon sélectionné
+        // claim lesson type
         String selectedLessonTypeName = (String) lessonTypeComboBox.getSelectedItem();
         if (selectedLessonTypeName == null) {
             JOptionPane.showMessageDialog(this, "Please select a lesson type.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -114,10 +114,9 @@ public class CreateLessonPanel extends JPanel {
             return;
         }
 
-        // Récupérer la date sélectionnée
         Date selectedDate = (Date) dateSpinner.getValue();
 
-        // Ajuster l'heure de fin en fonction de la période et de la durée
+        // adjust hour
         Date endDate = null;
         String selectedDuration = (String) durationComboBox.getSelectedItem();
 
@@ -137,23 +136,20 @@ public class CreateLessonPanel extends JPanel {
             	availableInstructors = Instructor.getAvailableInstructors(sqlDay, sqlDay, lessonType.getLessonTypeId(), selectedDuration.contains("Private"));
             }
         } else {
-            // Cours collectif
+            // public lesson
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(selectedDate);
 
-            // Vérification pour le premier jour, matin (9h-12h) et après 3 jours, après-midi (14h-17h)
             Date firstDayMorning = TimeAdjuster.adjustTimeToPeriod(new java.sql.Date(selectedDate.getTime()), LessonPeriod.MORNING, true);
-            calendar.add(Calendar.DATE, 3); // Ajouter 3 jours pour le dernier jour
+            calendar.add(Calendar.DATE, 3); 
             Date lastDayAfternoon = TimeAdjuster.adjustTimeToPeriod(new java.sql.Date(calendar.getTimeInMillis()), LessonPeriod.AFTERNOON, false);
 
-            // Récupérer les instructeurs disponibles pour ces deux moments
             java.sql.Date sqlFirstDayMorning = new java.sql.Date(firstDayMorning.getTime());
             java.sql.Date sqlLastDayAfternoon = new java.sql.Date(lastDayAfternoon.getTime());
 
             availableInstructors = Instructor.getAvailableInstructors(sqlFirstDayMorning, sqlLastDayAfternoon, lessonType.getLessonTypeId(), selectedDuration.contains("Private"));
         }
 
-        // Mise à jour de la liste des instructeurs
         DefaultListModel<String> model = new DefaultListModel<>();
         for (Instructor instructor : availableInstructors) {
             model.addElement(instructor.getFirstName() + " " + instructor.getLastName());

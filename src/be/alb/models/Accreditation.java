@@ -46,20 +46,16 @@ public class Accreditation {
     {
     	AccreditationDAO accreditationDAO = new AccreditationDAO();
     	return accreditationDAO.addAccreditationsToInstructor(instructor);
-    	
     }
     
-    // override equals and hashcode so it works when comparing value and not ref
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Accreditation that = (Accreditation) o;
-        return accreditationID == that.accreditationID;
+    public boolean equals(Object obj) {
+    	return this.toString()==obj.toString() ;
     }
-
+    	
     @Override
     public int hashCode() {
-        return Objects.hash(accreditationID); 
+    	return toString().hashCode();
     }
+    	
 }
