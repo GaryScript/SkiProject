@@ -14,5 +14,5 @@ public interface SkierDAOInterface {
 
     boolean updateSkier(Skier skier) throws SQLException;
 
-    boolean deleteSkier(int skierId) throws SQLException;
+    boolean deleteSkier(Skier skier) throws SQLException;
 }

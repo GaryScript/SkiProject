@@ -45,7 +45,7 @@ public abstract class Person {
 	    }
 	    
 	    public String getLastName() {
-	        return firstName;
+	        return lastName;
 	    }
 
 	    public void setLastName(String name) {
