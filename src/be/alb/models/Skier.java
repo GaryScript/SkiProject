@@ -108,6 +108,14 @@ public class Skier extends Person {
         result.add(0, "1");
         return result;
     }
-
-
+    
+    public boolean deleteSkier() {
+    	SkierDAO skierDAO = new SkierDAO(); 
+    	try {
+			return skierDAO.deleteSkier(this);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+    	return false;
+    }
 }

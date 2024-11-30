@@ -110,11 +110,11 @@ public class SkierDAO implements SkierDAOInterface {
             return affectedRows > 0; 
         }
     }
-
-    public boolean deleteSkier(int skierId) throws SQLException {
+    
+    public boolean deleteSkier(Skier skier) throws SQLException {
         String query = "DELETE FROM Skiers WHERE skierid = ?"; 
         try (PreparedStatement pstmt = connection.prepareStatement(query)) {
-            pstmt.setInt(1, skierId);
+            pstmt.setInt(1, skier.getId());
             int affectedRows = pstmt.executeUpdate();
             return affectedRows > 0; 
         }
