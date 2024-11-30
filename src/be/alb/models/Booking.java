@@ -256,6 +256,17 @@ public class Booking {
     	return bookingDAO.deleteBooking(this);
     }
     
+    public double calculatePrice() {
+        double basePrice = lesson.getLessonType().getPrice();
+
+        if (lesson.isPrivate()) {
+            return basePrice * 0.85; 
+        }
+
+        return basePrice; 
+    }
+
+    
     
 
 
