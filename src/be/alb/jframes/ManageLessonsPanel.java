@@ -140,6 +140,7 @@ public class ManageLessonsPanel extends JPanel {
     }
 
     // Supprimer la leçon sélectionnée
+ // Supprimer la leçon sélectionnée
     private void deleteSelectedLesson() {
         int selectedRow = lessonTable.getSelectedRow();
         if (selectedRow == -1) {
@@ -147,7 +148,10 @@ public class ManageLessonsPanel extends JPanel {
             return;
         }
 
+        // Récupérer la leçon sélectionnée
         Lesson selectedLesson = lessons.get(selectedRow);
+
+        // Demander confirmation avant de supprimer
         int confirmation = JOptionPane.showConfirmDialog(
                 this,
                 "Are you sure you want to delete this lesson?",
@@ -156,14 +160,16 @@ public class ManageLessonsPanel extends JPanel {
         );
 
         if (confirmation == JOptionPane.YES_OPTION) {
+            // Suppression de la leçon
             if (selectedLesson.deleteLesson()) {
                 JOptionPane.showMessageDialog(this, "Lesson deleted successfully", "Success", JOptionPane.INFORMATION_MESSAGE);
-                loadLessonData(privateLessonButton.isSelected());
+                loadLessonData(privateLessonButton.isSelected());  // Recharger les données après la suppression
             } else {
                 JOptionPane.showMessageDialog(this, "Failed to delete lesson", "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
+
 
     // Ouvrir le panneau pour créer une nouvelle leçon
     private void openCreateLessonPage() {

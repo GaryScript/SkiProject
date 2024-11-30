@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.JOptionPane;
+
 import be.alb.database.OracleDBConnection;
 import be.alb.models.Accreditation;
 import be.alb.models.Booking;
@@ -203,6 +205,48 @@ public class BookingDAO {
 
 	    return bookings;
 	}
+	
+	public boolean deleteBooking(Booking booking) {
+        boolean isDeleted = false;
+
+        // Requête SQL pour supprimer la leçon
+        String sql = "DELETE FROM bookings WHERE bookingid = ?";
+
+        // Connexion à la base de données
+        Connection conn = OracleDBConnection.getInstance(); 
+        PreparedStatement stmt = null;
+
+        try {
+            // Préparation de la requête
+            stmt = conn.prepareStatement(sql);
+
+            // Affectation des paramètres
+            stmt.setInt(1, booking.getBookingId());
+
+            // Exécution de la requête
+            int rowsAffected = stmt.executeUpdate();
+
+            // Si une ligne a été affectée, la suppression est réussie
+            if (rowsAffected > 0) {
+                isDeleted = true;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Erreur lors de la suppression du booking : " + e.getMessage());
+        } finally {
+            // Fermeture des ressources
+            try {
+                if (stmt != null) {
+                    stmt.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return isDeleted;
+    }
 
 
 

@@ -266,6 +266,11 @@ public class Booking {
         return bookings;
     }
     
+    public boolean deleteBooking() {
+    	BookingDAO bookingDAO = new BookingDAO(); 
+    	return bookingDAO.deleteBooking(this);
+    }
+    
     
 
 
