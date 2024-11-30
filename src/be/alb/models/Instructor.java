@@ -15,12 +15,12 @@ public class Instructor extends Person {
     private List<Lesson> lessons;
 
     // constructors
-    public Instructor(int id, String firstName, String lastName, String city, String postalCode, String streetName, String streetNumber, LocalDate dob,
-    		List<Accreditation> accreditations, List<Lesson> lessons) {
-        super(id, firstName, lastName, city, postalCode, streetName, streetNumber, dob);
-        this.accreditations = accreditations;
-        this.lessons = lessons;
-    }
+//    public Instructor(int id, String firstName, String lastName, String city, String postalCode, String streetName, String streetNumber, LocalDate dob,
+//    		List<Accreditation> accreditations, List<Lesson> lessons) {
+//        super(id, firstName, lastName, city, postalCode, streetName, streetNumber, dob);
+//        this.accreditations = accreditations;
+//        this.lessons = lessons;
+//    }
     
     public Instructor(int id, String firstName, String lastName, String city, String postalCode, String streetName, String streetNumber, LocalDate dob) {
         super(id, firstName, lastName, city, postalCode, streetName, streetNumber, dob);

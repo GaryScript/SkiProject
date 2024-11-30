@@ -11,6 +11,7 @@ import javax.swing.JOptionPane;
 
 import be.alb.dao.BookingDAO;
 import be.alb.dao.LessonDAO;
+import be.alb.dao.SkierDAO;
 
 public class Booking {
 
@@ -258,6 +259,16 @@ public class Booking {
         }
         
         return true;
+    }
+    
+    public static List<Booking> getAllBookings() throws SQLException {
+        List<Booking> bookings = null;
+        
+        BookingDAO bookingDAO = new BookingDAO();
+
+        bookings = bookingDAO.getAllBookings();
+
+        return bookings;
     }
     
     
