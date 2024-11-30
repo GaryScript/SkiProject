@@ -24,25 +24,49 @@ public class InstructorDAO {
 	    ResultSet rs = null;
 
 	    try {
-	        String query = "SELECT * FROM Instructors";
+	        // Modifie la requête pour inclure les accréditations
+	        String query = "SELECT i.INSTRUCTORID, i.FIRSTNAME, i.LASTNAME, i.CITY, i.POSTALCODE, i.STREETNAME, i.STREETNUMBER, i.DOB, " +
+	                       "a.ACCREDITATIONID, a.NAME AS ACCREDITATION_NAME " +
+	                       "FROM INSTRUCTORS i " +
+	                       "LEFT JOIN INSTRUCTORACCREDITATION ia ON i.INSTRUCTORID = ia.INSTRUCTORID " +
+	                       "LEFT JOIN ACCREDITATIONS a ON ia.ACCREDITATIONID = a.ACCREDITATIONID";
+	        
 	        stmt = conn.createStatement();
 	        rs = stmt.executeQuery(query);
 
-	        while (rs.next()) {
-	            int id = rs.getInt("instructorId");
-	            String name = rs.getString("lastName");
-	            String firstName = rs.getString("firstName");
-	            String city = rs.getString("city");
-	            String postalCode = rs.getString("postalCode");
-	            String streetName = rs.getString("streetName");
-	            String streetNumber = rs.getString("streetNumber");
-	            Date dob = rs.getDate("dob");
+	        // Utilise une map pour éviter les doublons d'instructeurs (car un instructeur peut avoir plusieurs accréditations)
+	        Map<Integer, Instructor> instructorMap = new HashMap<>();
 
+	        while (rs.next()) {
+	            int id = rs.getInt("INSTRUCTORID");
+	            String name = rs.getString("LASTNAME");
+	            String firstName = rs.getString("FIRSTNAME");
+	            String city = rs.getString("CITY");
+	            String postalCode = rs.getString("POSTALCODE");
+	            String streetName = rs.getString("STREETNAME");
+	            String streetNumber = rs.getString("STREETNUMBER");
+	            Date dob = rs.getDate("DOB");
 	            LocalDate localDob = (dob != null) ? dob.toLocalDate() : null;
 
-	            Instructor instructor = new Instructor(id, name, firstName, city, postalCode, streetName, streetNumber, localDob);
-	            instructors.add(instructor);
+	            // Si l'instructeur n'est pas déjà dans la map, on l'ajoute
+	            Instructor instructor = instructorMap.get(id);
+	            if (instructor == null) {
+	                instructor = new Instructor(id, name, firstName, city, postalCode, streetName, streetNumber, localDob, new ArrayList<>());
+	                instructorMap.put(id, instructor);
+	            }
+
+	            // Récupère l'accréditation et l'ajoute à la liste des accréditations de l'instructeur
+	            int accreditationId = rs.getInt("ACCREDITATIONID");
+	            if (accreditationId > 0) {
+	                String accreditationName = rs.getString("ACCREDITATION_NAME");
+	                Accreditation accreditation = new Accreditation(accreditationId, accreditationName);
+	                instructor.getAccreditations().add(accreditation);
+	            }
 	        }
+
+	        // Ajoute tous les instructeurs de la map à la liste
+	        instructors.addAll(instructorMap.values());
+
 	    } catch (SQLException e) {
 	        e.printStackTrace();
 	    } finally {
@@ -56,6 +80,7 @@ public class InstructorDAO {
 
 	    return instructors;
 	}
+
 
     
 	public static int createInstructor(Instructor instructor) {
