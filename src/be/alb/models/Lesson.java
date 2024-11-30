@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import be.alb.dao.LessonDAO;
+import be.alb.dao.SkierDAO;
 import be.alb.enums.LessonPeriod;
 import be.alb.enums.LessonTypeEnum;
 import be.alb.utils.TimeAdjuster;
@@ -221,6 +222,11 @@ public class Lesson {
         } catch (SQLException e) {
             throw new RuntimeException("Error retrieving lessons: " + e.getMessage(), e);
         }
+    }
+    
+    public boolean deleteLesson() {
+    	LessonDAO lessonDAO = new LessonDAO(); 
+    	return lessonDAO.deleteLesson(this);
     }
     
     
